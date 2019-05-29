@@ -30,7 +30,8 @@ SOURCES += \
     soldier.cpp \
     constants.cpp \
     engine.cpp \
-    land.cpp
+    land.cpp \
+    graphicsitem.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -39,7 +40,8 @@ HEADERS += \
     soldier.h \
     constants.h \
     engine.h \
-    land.h
+    land.h \
+    graphicsitem.h
 
 FORMS += \
         mainwindow.ui

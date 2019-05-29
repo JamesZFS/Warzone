@@ -1,15 +1,14 @@
 #ifndef LAND_H
 #define LAND_H
 
-#include <QGraphicsItem>
+#include "graphicsitem.h"
 //#include <Box2D/Box2D.h>
 class b2Body;
 class b2Fixture;
-struct b2Vec2;
 
 class GameSystem;
 
-class Land : public QGraphicsItem
+class Land : public GraphicsItem
 {
     friend class GameSystem;
 
@@ -23,8 +22,6 @@ private:
     QRectF b_box;   // bounding rect
 
 public:
-    void setB2Pos(const b2Vec2 &b_pos);
-
     // QGraphicsItem interface
     QRectF boundingRect() const override;
 

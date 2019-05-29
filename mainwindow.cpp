@@ -19,7 +19,11 @@ MainWindow::MainWindow(QWidget *parent) :
     view.setBackgroundBrush(Qt::white);
     view.setCacheMode(QGraphicsView::CacheBackground);
     view.setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-    view.setDragMode(QGraphicsView::ScrollHandDrag);
+//    view.setDragMode(QGraphicsView::ScrollHandDrag);
+    view.scale(5, -5);
+
+    // game system logic
+    connect(m_gamesystem, SIGNAL(requireOperation(Side)), this, SLOT(listenOperation()));
 }
 
 MainWindow::~MainWindow()
@@ -31,4 +35,16 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionstart_triggered()
 {
     m_gamesystem->start();
+}
+
+void MainWindow::on_bt_test_clicked()
+{
+    if (!m_gamesystem->isOperational()) return;
+    qDebug("try to move...");
+    m_gamesystem->moveCurUnit(b2Vec2(randf(-10, 10), randf(-10, 10)));
+}
+
+void MainWindow::listenOperation()
+{
+    qDebug("simulation ends. listening for operation...");
 }

@@ -7,8 +7,8 @@ GameSystem::GameSystem() :
     QObject(nullptr),
     world(nullptr), land(nullptr), water_system(nullptr),
     cur_unit(nullptr), cur_player(e_NONE),
-    world_size(100), gamestatus(e_COMMON), proxy_engine(nullptr),
-    scene(new QGraphicsScene(-world_size, -world_size, 2 * world_size, 2 * world_size))
+    world_size(50), gamestatus(e_COMMON), proxy_engine(nullptr),
+    scene(new QGraphicsScene)
 {
 }
 
@@ -25,7 +25,7 @@ void GameSystem::start()
     cur_unit = R_units[prev_R_unit_index];
     proxy_engine = new Engine(this, world);
     connect(proxy_engine, SIGNAL(requiresUpdate()), this, SLOT(advanceScene()));
-    emit requiresOperation(cur_player);
+    emit requireOperation(cur_player);
 }
 
 void GameSystem::end()
@@ -52,7 +52,7 @@ void GameSystem::nextPlayer()
         break;
     }
     emit playerChanged(cur_player);
-    emit requiresOperation(cur_player); // wait for next user's operation
+    emit requireOperation(cur_player); // wait for next user's operation
 }
 
 QGraphicsScene *GameSystem::getScene() const
@@ -89,7 +89,7 @@ void GameSystem::resetWorld()
 void GameSystem::initWorld()
 {
     // create world
-    world = new b2World({0, -10});
+    world = new b2World(b2Vec2(0, -GameConsts::gravity_constant));
 
     // create land
     createLand();
@@ -120,6 +120,7 @@ void GameSystem::initWorld()
 
 void GameSystem::createLand()
 {
+    // todo various land shape
     b2BodyDef land_def;
     land_def.position.Set(0, -10);
     land_def.type = b2_staticBody;
@@ -127,7 +128,7 @@ void GameSystem::createLand()
 
     b2PolygonShape land_shape;
     land_shape.SetAsBox(world_size, 10);
-    land_body->CreateFixture(&land_shape, 0);
+    land_body->CreateFixture(&land_shape, 0)->SetFriction(0.8);
 
     // new land instance
     land = new Land(land_body);
@@ -146,7 +147,7 @@ void GameSystem::createSoldier(const SoldierDef &unit_def)
     // fixture must be created before unit
     b2CircleShape shape;
     shape.m_radius = unit_def.size;
-    body->CreateFixture(&shape, GameConsts::soldier_density);
+    body->CreateFixture(&shape, GameConsts::soldier_density)->SetFriction(0.5);
 
     // new soldier instance
     auto unit = new Soldier(unit_def.side, unit_def.life, unit_def.size, body);
@@ -185,7 +186,7 @@ void GameSystem::advanceScene()
 void GameSystem::waitForOperation()
 {
     gamestatus = e_OPERATIONAL;
-    emit requiresOperation(cur_player);
+    emit requireOperation(cur_player);
 }
 
 GameSystem::GameStatus GameSystem::getGamestatus() const
@@ -193,7 +194,12 @@ GameSystem::GameStatus GameSystem::getGamestatus() const
     return gamestatus;
 }
 
-void GameSystem::moveCurUnit(b2Vec2 strength)
+bool GameSystem::isOperational() const
+{
+    return gamestatus == e_OPERATIONAL;
+}
+
+void GameSystem::moveCurUnit(const b2Vec2 &strength)
 {
     Q_ASSERT(gamestatus == e_OPERATIONAL);
     cur_unit->move(strength);

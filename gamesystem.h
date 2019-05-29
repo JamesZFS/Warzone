@@ -40,7 +40,9 @@ public:
 
     GameStatus getGamestatus() const;
 
-    void moveCurUnit(b2Vec2 strength);
+    bool isOperational() const;
+
+    void moveCurUnit(const b2Vec2 &strength);
 
     void fireCurUnit(Weapons weapon, b2Vec2 strength);
 
@@ -51,7 +53,7 @@ signals:
 
     void unitKilled(QString msg);
 
-    void requiresOperation(Side side);
+    void requireOperation(Side side);
 
     void playerChanged(Side side);
 

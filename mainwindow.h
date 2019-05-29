@@ -22,6 +22,10 @@ public:
 private slots:
     void on_actionstart_triggered();
 
+    void on_bt_test_clicked();
+
+    void listenOperation();
+
 private:
 
     Ui::MainWindow *ui;

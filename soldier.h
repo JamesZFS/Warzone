@@ -2,8 +2,8 @@
 #define SOLDIER_H
 
 #include "defs.h"
+#include "graphicsitem.h"
 #include <Box2D/Box2D.h>
-#include <QGraphicsItem>
 
 class GameSystem;
 
@@ -36,7 +36,7 @@ struct SoldierDef
     }
 };
 
-class Soldier : public QGraphicsItem
+class Soldier : public GraphicsItem
 {
     friend class GameSystem;
 
@@ -90,7 +90,6 @@ protected:
     const qreal radius; // radius on the screen
 
 public:
-    void setB2Pos(const b2Vec2 &b_pos);
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;

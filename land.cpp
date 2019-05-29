@@ -21,11 +21,6 @@ Land::Land(b2Body *land_body_) : body(land_body_)
     b_box = QRectF(x_min, y_min, x_max - x_min, y_max - y_min);
 }
 
-void Land::setB2Pos(const b2Vec2 &b_pos)
-{
-    setPos(b_pos.x, b_pos.y);
-}
-
 QRectF Land::boundingRect() const
 {
     return b_box;

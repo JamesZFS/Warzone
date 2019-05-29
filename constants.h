@@ -15,6 +15,7 @@ namespace GameConsts {
 
 extern double soldier_density;
 extern int max_n_unit;
+extern double gravity_constant;
 
 }
 
