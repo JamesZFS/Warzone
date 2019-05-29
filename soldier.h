@@ -3,17 +3,25 @@
 
 #include "defs.h"
 #include <Box2D/Box2D.h>
+#include <QGraphicsItem>
 
 class GameSystem;
 
+enum Side
+{
+    e_RED, e_BLACK, e_NONE
+};
+
 struct SoldierDef
 {
+    Side side;
     int life;
     double size;    // power and mass is proposionate to size
     b2Vec2 position;    // world coord center
 
     SoldierDef()
     {
+        side = e_NONE;
         life = 100;
         size = 1;
         position = {0, 0};
@@ -21,13 +29,14 @@ struct SoldierDef
 
     void rand()
     {
+        side = randint(0, 2) == 0 ? e_RED : e_BLACK;
         life = randint(100, 300);
         size = randf(0.5, 3);
         position.Set(randf(-100, 100), randf(-100, 100));
     }
 };
 
-class Soldier
+class Soldier : public QGraphicsItem
 {
     friend class GameSystem;
 
@@ -36,7 +45,7 @@ class Soldier
     double getPower() const;
 
 protected:
-    Soldier(int life_, double power_, b2Body *body_);
+    Soldier(Side side_, int life_, double power_, b2Body *body_);
     ~Soldier() = default;
 
     void setLife(int value);
@@ -48,9 +57,12 @@ protected:
     /**
      * @brief move
      * move the soldier via an impulse towards (dx, dy)
-     * @param delta
+     * @param strength
      */
-    void move(b2Vec2 delta);
+    void move(const b2Vec2 &strength);
+
+    // member variables:
+    Side side;
 
     /**
      * HP, > 0
@@ -74,6 +86,18 @@ protected:
      * geometric fixture of the body
      */
     b2Fixture* const fixture;
+
+    const qreal radius; // radius on the screen
+
+public:
+    void setB2Pos(const b2Vec2 &b_pos);
+
+    // QGraphicsItem interface
+    QRectF boundingRect() const override;
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
+    void advance(int phase) override;
 };
 
 #endif // SOLDIER_H

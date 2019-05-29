@@ -28,14 +28,18 @@ SOURCES += \
         mainwindow.cpp \
     gamesystem.cpp \
     soldier.cpp \
-    constants.cpp
+    constants.cpp \
+    engine.cpp \
+    land.cpp
 
 HEADERS += \
         mainwindow.h \
     gamesystem.h \
     defs.h \
     soldier.h \
-    constants.h
+    constants.h \
+    engine.h \
+    land.h
 
 FORMS += \
         mainwindow.ui

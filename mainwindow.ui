@@ -31,22 +31,6 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QFrame" name="frame">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>871</width>
-     <height>741</height>
-    </rect>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-  </widget>
   <widget class="QLCDNumber" name="lcdNumber">
    <property name="geometry">
     <rect>
@@ -120,6 +104,16 @@
    </property>
    <property name="text">
     <string>End</string>
+   </property>
+  </widget>
+  <widget class="QGraphicsView" name="graphics_view">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>871</width>
+     <height>751</height>
+    </rect>
    </property>
   </widget>
   <action name="actionstart">

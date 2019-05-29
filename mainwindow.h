@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QtEvents>
+#include "defs.h"
 
 class GameSystem;
 
@@ -22,17 +23,9 @@ private slots:
     void on_actionstart_triggered();
 
 private:
-    enum GameState
-    {
-        e_COMMON = 0,
-        e_STARTED,
-        e_PAUSED,
-        e_SUMMARY
-    };
 
     Ui::MainWindow *ui;
     GameSystem *m_gamesystem;
-    GameState m_gamestate;
 };
 
 #endif // MAINWINDOW_H

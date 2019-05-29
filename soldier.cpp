@@ -1,11 +1,18 @@
 #include "soldier.h"
 //#include <Box2D/Box2D.h>
+#include <QPainter>
 
-Soldier::Soldier(int life_, double power_, b2Body *body_) :
-    life(life_), power(power_), body(body_), fixture(body->GetFixtureList())
+inline static qreal toDegrees(qreal rad)
 {
-    assert(life > 0);
-    assert(fixture && fixture->GetNext() == nullptr);
+    return 180.0 * rad / M_PI;
+}
+
+Soldier::Soldier(Side side_, int life_, double power_, b2Body *body_) :
+    side(side_), life(life_), power(power_), body(body_),
+    fixture(body->GetFixtureList()), radius(fixture->GetShape()->m_radius)
+{
+    Q_ASSERT(life > 0);
+    Q_ASSERT(fixture && fixture->GetNext() == nullptr);
 }
 
 b2Body *Soldier::getBody() const
@@ -13,9 +20,34 @@ b2Body *Soldier::getBody() const
     return body;
 }
 
-void Soldier::move(b2Vec2 delta)
+void Soldier::move(const b2Vec2 &strength)
 {
-    body->ApplyLinearImpulse(10 * delta, body->GetWorldCenter(), true);
+    body->ApplyLinearImpulse(10 * strength, body->GetWorldCenter(), true);
+}
+
+void Soldier::setB2Pos(const b2Vec2 &b_pos)
+{
+    setPos(b_pos.x, b_pos.y);
+}
+
+QRectF Soldier::boundingRect() const
+{
+    return QRectF(-radius, -radius, 2 * radius, 2 * radius);
+}
+
+void Soldier::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+{
+    Q_ASSERT(side != e_NONE);
+    painter->setBrush(side == e_RED ? Qt::red : Qt::black);
+    painter->drawEllipse(-0.8 * radius, -1.0 * radius, 1.6 * radius, 2.0 * radius);
+}
+
+void Soldier::advance(int phase)
+{
+    if (phase == 0) return;
+    auto &b_pos = body->GetPosition();
+    setPos(b_pos.x, b_pos.y);
+    setRotation(toDegrees(body->GetAngle()));   // notice liquidfun uses rad angle
 }
 
 double Soldier::getPower() const
