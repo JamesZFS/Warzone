@@ -40,60 +40,71 @@ struct SoldierDef
  * with its origin the center of mass
  */
 class Soldier : public Actor
-{    
+{
 public:
-    Soldier(Side side_, int life_, double power_, b2Body *body_);
+    Soldier(Side side, int life, double size, b2Body *body);
 
     int getLife() const;
-
     double getPower() const;
-
     void setLife(int value);
-
     void setPower(double value);
-
     b2Body *getBody() const;
-
     qreal getRadius() const;
+    double getSize() const;
 
     /**
      * @brief move
      * move the soldier via an impulse towards (dx, dy)
      * @param strength
      */
-    void move(const b2Vec2 &strength);
+    void jump(const b2Vec2 &strength);
 
     // member variables:
 
-    const Side side;
+    const Side m_side;
 
 private:
-
     /**
      * HP, > 0
      * when HP == 0, the soldier BOOMS to die
      */
-    int life;
+    int m_life;
 
     /** attack ability
      * the greater power, the more clumsy a soldier is (larger mass)
      */
-    double power;
+    double m_power;
 
-    /**
-     * geometric fixture of the body
-     */
-    b2Fixture* const fixture;
+    const double m_size;  // real size
 
-    const qreal radius; // radius on the screen
+    const qreal m_radius; // radius on the screen
+
+protected:
+    virtual const QColor getColor() = 0;
 
     // QGraphicsItem interface
 public:
-    QRectF boundingRect() const override;
-
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+};
 
-    void advance(int phase) override;
+class RedSoldier : public Soldier
+{
+public:
+    RedSoldier(int life_, double size_, b2Body *body_);
+
+    // Soldier interface
+protected:
+    const QColor getColor() override { return Qt::red; }
+};
+
+class BlackSoldier : public Soldier
+{
+public:
+    BlackSoldier(int life_, double size_, b2Body *body_);
+
+    // Soldier interface
+protected:
+    const QColor getColor() override { return Qt::black; }
 };
 
 #endif // SOLDIER_H

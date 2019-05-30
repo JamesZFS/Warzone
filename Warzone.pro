@@ -31,7 +31,9 @@ SOURCES += \
     constants.cpp \
     engine.cpp \
     land.cpp \
-    actor.cpp
+    actor.cpp \
+    weapon.cpp \
+    contactlistener.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -41,7 +43,9 @@ HEADERS += \
     constants.h \
     engine.h \
     land.h \
-    actor.h
+    actor.h \
+    weapon.h \
+    contactlistener.h
 
 FORMS += \
         mainwindow.ui

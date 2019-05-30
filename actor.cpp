@@ -1,20 +1,26 @@
 #include "actor.h"
-#include <Box2D/Box2D.h>
 #include "defs.h"
+#include <Box2D/Box2D.h>
+#include <QtMath>
 
-Actor::Actor(b2Body *body_, qreal damping, qreal friction) :
-    body(body_), b_box(-10, -10, 20, 20)
+Actor::Actor(b2Body *body) :
+    m_body(body), m_bbox(-10, -10, 20, 20)//, m_world(body->GetWorld())
 {
-    Q_ASSERT(body->GetFixtureList());
-    body->SetLinearDamping(damping);
-    body->SetAngularDamping(damping);
-    for (auto fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
-        fixture->SetFriction(friction);
+    setB2Pos(m_body->GetPosition());
+    setB2Angle(m_body->GetAngle());
+    m_body->SetUserData(this);            // link b2body to Actor
 }
 
 void Actor::setB2Pos(const b2Vec2 &b_pos)
 {
     setPos(mapB2Pos(b_pos));
+}
+
+void Actor::setB2Angle(const float32 angle)
+{
+//    qDebug() << "setB2Angle, angle = " << qRadiansToDegrees(angle);
+    setRotation(qRadiansToDegrees(angle));   // notice liquidfun uses rad angle
+//    setRotation(45);
 }
 
 QPointF Actor::mapB2Pos(const b2Vec2 &b_pos) const   // zoom x10
@@ -28,4 +34,16 @@ QPolygonF Actor::fromB2Polygon(const b2PolygonShape &b2_poly) const
     for (int i = 0; i < b2_poly.GetVertexCount(); ++i)
         polygon << mapB2Pos(b2_poly.GetVertex(i));
     return polygon;
+}
+
+b2Body *Actor::body() const
+{
+    return m_body;
+}
+
+void Actor::advance(int phase)
+{
+    if (phase == 0) return;
+    setB2Pos(m_body->GetPosition());
+    setB2Angle(m_body->GetAngle());
 }

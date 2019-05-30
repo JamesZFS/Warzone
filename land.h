@@ -11,12 +11,12 @@ class GameSystem;
 class Land : public Actor
 {
 public:
-    explicit Land(b2Body *land_body_);
+    explicit Land(b2Body *land_body);
 
     // QGraphicsItem interface
-    QRectF boundingRect() const override;
-
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
+    void advance(int) override {} // land is static
 };
 
 #endif // LAND_H

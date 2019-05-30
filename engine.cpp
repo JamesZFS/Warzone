@@ -15,18 +15,26 @@ Engine::~Engine()
     m_timer->deleteLater();
 }
 
+void Engine::discardBody(b2Body *body)
+{
+    m_body_trash.push(body);
+}
+
 void Engine::doSimulation()
 {
+    m_n_iter = 0;
     m_timer->start(LiquidFun::time_step * 1000.0);
 }
 
 void Engine::stepWorld()
 {
-    if (!worldIsChanging()) {   // everything is static, stop simulation
+    dumpTrash();
+    if (!worldIsChanging() && m_n_iter) {   // everything is static, stop simulation
         m_timer->stop();
-        emit finished();
+        emit finished(m_n_iter);
         return;
     }
+    ++m_n_iter;
     m_world->Step(LiquidFun::time_step,
                   LiquidFun::n_velocity_iteration,
                   LiquidFun::n_position_iteration);
@@ -43,4 +51,10 @@ bool Engine::worldIsChanging() const
             return true;    // the world got something still moving
     }
     return false;
+}
+
+void Engine::dumpTrash()
+{
+    while (!m_body_trash.isEmpty())
+        m_world->DestroyBody(m_body_trash.pop());
 }
