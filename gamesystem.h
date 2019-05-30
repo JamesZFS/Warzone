@@ -87,7 +87,7 @@ private:
     Side cur_player;
     size_t prev_R_unit_index, prev_B_unit_index;
 
-    double world_size;  // half world size, the world is ranged (-size, size)^2
+    double world_size;  // half physical world size, the world is ranged (-size, size)^2
 
     GameStatus gamestatus;
 

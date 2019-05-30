@@ -22,9 +22,11 @@ public:
 private slots:
     void on_actionstart_triggered();
 
-    void on_bt_test_clicked();
+    void on_bt_move_clicked();
 
     void listenOperation();
+
+    void on_bt_fire_clicked();
 
 private:
 

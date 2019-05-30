@@ -18,9 +18,9 @@ MainWindow::MainWindow(QWidget *parent) :
     view.setRenderHint(QPainter::Antialiasing);
     view.setBackgroundBrush(Qt::white);
     view.setCacheMode(QGraphicsView::CacheBackground);
-    view.setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+//    view.setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 //    view.setDragMode(QGraphicsView::ScrollHandDrag);
-    view.scale(5, -5);
+    view.scale(0.8, -0.8);
 
     // game system logic
     connect(m_gamesystem, SIGNAL(requireOperation(Side)), this, SLOT(listenOperation()));
@@ -37,14 +37,21 @@ void MainWindow::on_actionstart_triggered()
     m_gamesystem->start();
 }
 
-void MainWindow::on_bt_test_clicked()
+void MainWindow::on_bt_move_clicked()
 {
     if (!m_gamesystem->isOperational()) return;
-    qDebug("try to move...");
+    qDebug("moving...");
     m_gamesystem->moveCurUnit(b2Vec2(randf(-10, 10), randf(-10, 10)));
 }
 
 void MainWindow::listenOperation()
 {
     qDebug("simulation ends. listening for operation...");
+}
+
+void MainWindow::on_bt_fire_clicked()
+{
+    if (!m_gamesystem->isOperational()) return;
+    qDebug("firing...");
+    m_gamesystem->fireCurUnit(GameSystem::e_BAZOOKA, b2Vec2(randf(-10, 10), randf(-10, 10)));
 }

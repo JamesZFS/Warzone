@@ -3,22 +3,15 @@
 #include <Box2D/Box2D.h>
 #include <QPainter>
 
-Land::Land(b2Body *land_body_) : body(land_body_)
+Land::Land(b2Body *land_body_) : Actor(land_body_, 0, 0.5)
 {
-    Q_ASSERT(land_body_->GetFixtureList());
-    float32 x_min = 1e10, x_max = -1e10, y_min = 1e10, y_max = -1e10;
     for (auto *fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
         auto b_polygon = dynamic_cast<b2PolygonShape*>(fixture->GetShape());
         Q_ASSERT(b_polygon);
-        for (int i = 0; i < b_polygon->GetVertexCount(); ++i) {    // find bound
-            auto &v = b_polygon->GetVertex(i);
-            x_min = std::min(x_min, v.x);
-            x_max = std::max(x_max, v.x);
-            y_min = std::min(y_min, v.y);
-            y_max = std::max(y_max, v.y);
-        }
+        auto polygon = fromB2Polygon(*b_polygon);
+        b_box = b_box.united(polygon.boundingRect());
     }
-    b_box = QRectF(x_min, y_min, x_max - x_min, y_max - y_min);
+    b_box += QMarginsF(1, 1, 1, 1);
 }
 
 QRectF Land::boundingRect() const
@@ -30,16 +23,11 @@ void Land::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
     int i = 0;
     for (auto *fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext(), ++i) {
-        QPolygonF polygon;
-        QColor color(10, 180 + 20 * i, 20);
-
         auto b_polygon = dynamic_cast<b2PolygonShape*>(fixture->GetShape());
         Q_ASSERT(b_polygon);
-        for (int j = 0; j < b_polygon->GetVertexCount(); ++j) {  // convert to QPolygon
-            auto &v = b_polygon->GetVertex(j);
-            polygon << QPointF(v.x, v.y);
-        }
 
+        auto polygon = fromB2Polygon(*b_polygon);
+        QColor color(10, 180 + 20 * i, 20);
         painter->setBrush(color);
         painter->drawPolygon(polygon);
     }

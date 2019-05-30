@@ -2,7 +2,7 @@
 #define SOLDIER_H
 
 #include "defs.h"
-#include "graphicsitem.h"
+#include "actor.h"
 #include <Box2D/Box2D.h>
 
 class GameSystem;
@@ -36,23 +36,25 @@ struct SoldierDef
     }
 };
 
-class Soldier : public GraphicsItem
-{
-    friend class GameSystem;
+/** the soldier is simplified into a circle body,
+ * with its origin the center of mass
+ */
+class Soldier : public Actor
+{    
+public:
+    Soldier(Side side_, int life_, double power_, b2Body *body_);
 
     int getLife() const;
 
     double getPower() const;
-
-protected:
-    Soldier(Side side_, int life_, double power_, b2Body *body_);
-    ~Soldier() = default;
 
     void setLife(int value);
 
     void setPower(double value);
 
     b2Body *getBody() const;
+
+    qreal getRadius() const;
 
     /**
      * @brief move
@@ -62,7 +64,10 @@ protected:
     void move(const b2Vec2 &strength);
 
     // member variables:
-    Side side;
+
+    const Side side;
+
+private:
 
     /**
      * HP, > 0
@@ -76,22 +81,14 @@ protected:
     double power;
 
     /**
-     * Physical body of the soldier, enpowered by LiquidFun™ backend
-     * the soldier is simplified into a circle body,
-     * with its origin the center of mass
-     */
-    b2Body* const body;
-
-    /**
      * geometric fixture of the body
      */
     b2Fixture* const fixture;
 
     const qreal radius; // radius on the screen
 
-public:
-
     // QGraphicsItem interface
+public:
     QRectF boundingRect() const override;
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;

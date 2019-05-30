@@ -18,6 +18,7 @@ void GameSystem::start()
     gamestatus = e_COMMON;
     resetWorld();
     initWorld();
+    scene->setSceneRect(-10 * world_size, -10 * world_size, 20 * world_size, 20 * world_size);
     gamestatus = e_OPERATIONAL;
     cur_player = e_RED; // let the red operate first
     prev_R_unit_index = 0;
@@ -35,7 +36,7 @@ void GameSystem::end()
 
 void GameSystem::nextPlayer()
 {
-    Q_ASSERT(gamestatus == e_OPERATIONAL);
+//    Q_ASSERT(gamestatus == e_OPERATIONAL);
     switch (cur_player) {
     case e_RED:
         cur_player = e_BLACK;
@@ -51,6 +52,7 @@ void GameSystem::nextPlayer()
         qFatal("invalid cur_player value!");
         break;
     }
+    gamestatus = e_OPERATIONAL;
     emit playerChanged(cur_player);
     emit requireOperation(cur_player); // wait for next user's operation
 }
@@ -102,12 +104,12 @@ void GameSystem::initWorld()
         SoldierDef def;
         def.life = 100;
         def.size = 0.5 + i * 0.2;
-        def.position.Set(randf(-world_size, +world_size), 2);
+        def.position.Set(randf(-world_size * 0.8, +world_size * 0.8), 2);
         //        world->RayCast();
         def.side = e_RED;
         createSoldier(def);
         def.side = e_BLACK;
-        def.position.Set(randf(-world_size, +world_size), 2);
+        def.position.Set(randf(-world_size * 0.8, +world_size * 0.8), 2);
         createSoldier(def);
     }
 
@@ -128,7 +130,11 @@ void GameSystem::createLand()
 
     b2PolygonShape land_shape;
     land_shape.SetAsBox(world_size, 10);
-    land_body->CreateFixture(&land_shape, 0)->SetFriction(0.8);
+    land_body->CreateFixture(&land_shape, 0);
+    land_shape.SetAsBox(1, 20, b2Vec2(-world_size + 1, 10), 0);
+    land_body->CreateFixture(&land_shape, 0);
+    land_shape.SetAsBox(1, 20, b2Vec2(+world_size - 1, 10), 0);
+    land_body->CreateFixture(&land_shape, 0);
 
     // new land instance
     land = new Land(land_body);
@@ -147,7 +153,7 @@ void GameSystem::createSoldier(const SoldierDef &unit_def)
     // fixture must be created before unit
     b2CircleShape shape;
     shape.m_radius = unit_def.size;
-    body->CreateFixture(&shape, GameConsts::soldier_density)->SetFriction(0.5);
+    body->CreateFixture(&shape, GameConsts::soldier_density);
 
     // new soldier instance
     auto unit = new Soldier(unit_def.side, unit_def.life, unit_def.size, body);

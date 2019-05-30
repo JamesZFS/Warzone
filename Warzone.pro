@@ -31,7 +31,7 @@ SOURCES += \
     constants.cpp \
     engine.cpp \
     land.cpp \
-    graphicsitem.cpp
+    actor.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -41,7 +41,7 @@ HEADERS += \
     constants.h \
     engine.h \
     land.h \
-    graphicsitem.h
+    actor.h
 
 FORMS += \
         mainwindow.ui

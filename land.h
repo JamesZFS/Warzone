@@ -1,27 +1,18 @@
 #ifndef LAND_H
 #define LAND_H
 
-#include "graphicsitem.h"
+#include "actor.h"
 //#include <Box2D/Box2D.h>
 class b2Body;
 class b2Fixture;
 
 class GameSystem;
 
-class Land : public GraphicsItem
+class Land : public Actor
 {
-    friend class GameSystem;
-
-protected:
-    explicit Land(b2Body *land_body_);
-    ~Land() = default;
-
-private:
-    b2Body* const body;
-
-    QRectF b_box;   // bounding rect
-
 public:
+    explicit Land(b2Body *land_body_);
+
     // QGraphicsItem interface
     QRectF boundingRect() const override;
 
