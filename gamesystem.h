@@ -55,8 +55,6 @@ protected:
     void killSoldier(Soldier *unit);
 
 protected slots:
-    void handleLaunched();
-    void handleTriggered();
     void advanceScene();
     void waitForOperation(quint32 n_iter);
     void nextPlayer();  // switch turn to next player with unit automatically selected

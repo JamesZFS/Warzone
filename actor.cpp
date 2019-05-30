@@ -4,7 +4,7 @@
 #include <QtMath>
 
 Actor::Actor(b2Body *body) :
-    m_body(body), m_bbox(-10, -10, 20, 20)//, m_world(body->GetWorld())
+    m_body(body), m_bbox(-10, -10, 20, 20), m_world(body->GetWorld())
 {
     setB2Pos(m_body->GetPosition());
     setB2Angle(m_body->GetAngle());

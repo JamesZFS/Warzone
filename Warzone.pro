@@ -33,7 +33,8 @@ SOURCES += \
     land.cpp \
     actor.cpp \
     weapon.cpp \
-    contactlistener.cpp
+    contactlistener.cpp \
+    explosion.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -45,7 +46,8 @@ HEADERS += \
     land.h \
     actor.h \
     weapon.h \
-    contactlistener.h
+    contactlistener.h \
+    explosion.h
 
 FORMS += \
         mainwindow.ui

@@ -29,8 +29,8 @@ protected:
      * the ownership is taken by world
      */
     b2Body* const m_body;
-
     QRectF m_bbox; // bounding box
+    const b2World* const m_world;
 
     // QGraphicsItem interface
 public:

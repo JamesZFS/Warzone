@@ -5,7 +5,7 @@
 #include <QStack>
 
 class b2World;
-class b2Body;
+class Actor;
 class QTimer;
 
 // used as a temporary simulation thread
@@ -16,7 +16,7 @@ public:
     Engine(QObject *parent, b2World *world);
     ~Engine();
 
-    void discardBody(b2Body *body);
+    void discard(Actor *actor);
 
 signals:
     void requiresUpdate();
@@ -35,7 +35,7 @@ private:
     b2World *m_world;
     QTimer *m_timer;
     quint32 m_n_iter;
-    QStack<b2Body*> m_body_trash; // will release these bodies after simulation
+    QStack<Actor*> m_trash; // will release these bodies after simulation
 };
 
 #endif // ENGINE_H

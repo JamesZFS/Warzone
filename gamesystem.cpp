@@ -205,16 +205,6 @@ void GameSystem::killSoldier(Soldier *unit)
     delete unit;
 }
 
-void GameSystem::handleLaunched()
-{
-    qDebug() << "handleLaunched()";
-}
-
-void GameSystem::handleTriggered()
-{
-    qDebug() << "handleTriggered()";
-}
-
 void GameSystem::advanceScene()
 {
     Q_ASSERT(m_scene);
@@ -251,16 +241,16 @@ void GameSystem::moveCurUnit(const b2Vec2 &strength)
 void GameSystem::destroyCurWeapon()
 {
     if (!m_cur_weapon) return;
-    m_scene->removeItem(m_cur_weapon);
-    m_proxy_engine->discardBody(m_cur_weapon->body());
-    delete m_cur_weapon;
+//    m_scene->removeItem(m_cur_weapon);
+    m_proxy_engine->discard(m_cur_weapon);
+//    delete m_cur_weapon;
     m_cur_weapon = nullptr;
     qDebug("weapon destroyed");
 }
 
 void GameSystem::onSimulationFinished()
 {
-    destroyCurWeapon();
+//    destroyCurWeapon();
 }
 
 void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)

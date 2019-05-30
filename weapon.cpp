@@ -1,6 +1,8 @@
 #include "weapon.h"
 #include "defs.h"
+#include "explosion.h"
 #include <QPainter>
+
 
 Weapon::Weapon(b2Body *body) : Actor(body), m_state(e_COMMON)
 {
@@ -71,5 +73,14 @@ void Bazooka::trigger() // called when cannon hits something
     m_state = e_TRIGGERED;
     // make an explosion
     qDebug("boom!");
-//    m_world->QueryShapeAABB();
+
+    auto center = m_body->GetPosition();
+    static auto rad = 5;
+    auto callback = new Explosion(m_body, center, rad, 60);
+    b2AABB aabb;
+    aabb.lowerBound = center - b2Vec2(rad, rad);
+    aabb.upperBound = center + b2Vec2(rad, rad);
+    m_world->QueryAABB(callback, aabb);
+
+    delete callback;
 }

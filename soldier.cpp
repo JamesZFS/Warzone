@@ -16,7 +16,7 @@ Soldier::Soldier(Side side, int life, double size, b2Body *body) :
     // fixture created after body
     b2CircleShape shape;
     shape.m_radius = size;
-    m_body->CreateFixture(&shape, GameConsts::soldier_density)->SetFriction(0.6);
+    m_body->CreateFixture(&shape, GameConsts::soldier_density)->SetFriction(0.4);
 
     m_bbox = QRectF(-m_radius - 1, -m_radius - 1, 2 * (m_radius + 1), 2 * (m_radius + 1));
 }

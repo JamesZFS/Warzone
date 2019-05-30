@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "defs.h"
+#include "actor.h"
 #include <Box2D/Box2D.h>
 #include <QTimer>
 
@@ -15,9 +16,9 @@ Engine::~Engine()
     m_timer->deleteLater();
 }
 
-void Engine::discardBody(b2Body *body)
+void Engine::discard(Actor *actor)
 {
-    m_body_trash.push(body);
+    m_trash.push(actor);
 }
 
 void Engine::doSimulation()
@@ -55,6 +56,9 @@ bool Engine::worldIsChanging() const
 
 void Engine::dumpTrash()
 {
-    while (!m_body_trash.isEmpty())
-        m_world->DestroyBody(m_body_trash.pop());
+    while (!m_trash.isEmpty()) {
+        auto actor = m_trash.pop();
+        m_world->DestroyBody(actor->body());
+        delete actor;
+    }
 }
