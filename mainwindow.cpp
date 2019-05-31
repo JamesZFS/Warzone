@@ -65,7 +65,7 @@ void MainWindow::on_bt_fire_clicked()
 {
     if (!m_gamesystem->isOperational()) return;
     ui->label->setText("firing...");
-    m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(randf(-2, 2), randf(0, 2)));
+    m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(randf(-0.5, 0.5), randf(1, 2)));
     //    m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(1, 1));
 }
 

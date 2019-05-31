@@ -29,9 +29,9 @@ void GameSystem::start()
     initWorld();
     m_scene->setSceneRect(-10 * m_world_size, -10 * m_world_size, 20 * m_world_size, 20 * m_world_size);
     m_cur_player = e_RED; // let the red operate first
-    m_prev_R_unit_index = 0;
-    m_prev_B_unit_index = -1;
-    m_cur_unit = m_R_units[m_prev_R_unit_index];
+    m_R_iter = m_R_units.constBegin();
+    m_B_iter = m_B_units.constBegin();
+    m_cur_unit = *m_R_iter;
     m_cur_weapon = nullptr;
     m_proxy_engine = new Engine(this, m_world);
     m_kill_list.clear();
@@ -99,7 +99,6 @@ void GameSystem::initWorld()
         def.life = 100;
         def.size = 0.5 + i * 0.2;
         def.position.Set(randf(-m_world_size * 0.8, +m_world_size * 0.8), 2);
-        //        world->RayCast();
         def.side = e_RED;
         createSoldier(def);
         def.side = e_BLACK;
@@ -109,8 +108,8 @@ void GameSystem::initWorld()
 
     LiquidFun::n_particle_iteration =
             m_world->CalculateReasonableParticleIterations(LiquidFun::time_step);
-    Q_ASSERT(m_R_units.length() == m_B_units.length() &&
-             m_R_units.length() == GameConsts::max_n_unit);
+    Q_ASSERT(m_R_units.size() == m_B_units.size() &&
+             m_R_units.size() == GameConsts::max_n_unit);
     qDebug() << "ground and units spwaned! game ready.";
 }
 
@@ -150,11 +149,11 @@ void GameSystem::createSoldier(const SoldierDef &unit_def)
     switch (unit_def.side) {
     case e_RED:
         unit = new RedSoldier(unit_def.life, unit_def.size, body);
-        m_R_units.push_back(static_cast<RedSoldier*>(unit));
+        m_R_units.insert((RedSoldier*)unit);
         break;
     case e_BLACK:
         unit = new BlackSoldier(unit_def.life, unit_def.size, body);
-        m_B_units.push_back(static_cast<BlackSoldier*>(unit));
+        m_B_units.insert((BlackSoldier*)unit);
         break;
     default:
         qFatal("invalid side value!");
@@ -189,13 +188,13 @@ void GameSystem::switchPlayer()
     switch (m_cur_player) {
     case e_RED:
         m_cur_player = e_BLACK;
-        m_prev_B_unit_index = (m_prev_B_unit_index + 1) % GameConsts::max_n_unit;
-        m_cur_unit = m_B_units[m_prev_B_unit_index];     // focus on the next unit
+        m_cur_unit = *m_B_iter;     // focus on the next unit
+        if (++m_B_iter == m_B_units.end()) m_B_iter = m_B_units.begin();
         break;
     case e_BLACK:
         m_cur_player = e_RED;
-        m_prev_R_unit_index = (m_prev_R_unit_index + 1) % GameConsts::max_n_unit;
-        m_cur_unit = m_R_units[m_prev_R_unit_index];
+        m_cur_unit = *m_R_iter;     // focus on the next unit
+        if (++m_R_iter == m_R_units.end()) m_R_iter = m_R_units.begin();
         break;
     default:
         qFatal("invalid cur_player value!");
@@ -241,18 +240,21 @@ void GameSystem::destroySoldier()
     auto unit = qobject_cast<Soldier*>(sender());
     Q_ASSERT(unit);
     qDebug("  a unit destroyed");
-    int id;
     switch (unit->m_side) {
     case e_RED:
-        id = m_R_units.indexOf(static_cast<RedSoldier*>(unit));
-        if (id < 0) return;
-        m_R_units.erase(m_R_units.begin() + id);
+        Q_ASSERT(m_R_units.remove((RedSoldier*)unit));
+        if (*m_R_iter == (RedSoldier*)unit) {
+            qDebug("  >> destroySoldier");
+            m_R_iter = m_R_units.constBegin();
+        }
         emit unitKilled(QString("Red has lost a unit!"));
         break;
     case e_BLACK:
-        id = m_B_units.indexOf(static_cast<BlackSoldier*>(unit));
-        if (id < 0) return;
-        m_B_units.erase(m_B_units.begin() + id);
+        Q_ASSERT(m_B_units.remove((BlackSoldier*)unit));
+        if (*m_B_iter == (BlackSoldier*)unit) {
+            qDebug("  >> destroySoldier");
+            m_B_iter = m_B_units.constBegin();
+        }
         emit unitKilled(QString("Black has lost a unit!"));
         break;
     default:
@@ -271,11 +273,10 @@ void GameSystem::onSimulationFinished(quint32 n_iter)
         m_game_state = e_OPERATIONAL;
         (this->*m_after_simulation)();
     }
-    else {
-        foreach (Soldier *unit, m_kill_list) {
-            setoffSoldier(unit);
-        }
-        m_kill_list.clear();
+    else {  // execute one unit per simulation
+        Soldier *exec_unit = *m_kill_list.begin();
+        m_kill_list.remove(exec_unit);
+        exec_unit->setoff();
         simulateThen(m_after_simulation);   // keep exploding until no one killed
     }
 }

@@ -2,7 +2,7 @@
 #include "explosion.h"
 #include <QPainter>
 
-Soldier::Soldier(Side side, int life, double size, b2Body *body) :
+Soldier::Soldier(Side side, int life, qreal size, b2Body *body) :
     Actor(body),
     m_side(side), m_life(life), m_power(size),
     m_size(size), m_radius(10 * size)
@@ -24,6 +24,7 @@ Soldier::Soldier(Side side, int life, double size, b2Body *body) :
     m_body->CreateFixture(&fix_def);
 
     m_bbox = QRectF(-m_radius - 1, -m_radius - 1, 2 * (m_radius + 1), 2 * (m_radius + 1));
+    m_bbox = m_bbox.united(QRectF(-11, 32, 22, 30));
 }
 
 b2Body *Soldier::getBody() const
@@ -33,7 +34,7 @@ b2Body *Soldier::getBody() const
 
 void Soldier::jump(const b2Vec2 &strength)
 {
-    m_body->ApplyLinearImpulse(5 * strength, m_body->GetWorldCenter(), true);
+    m_body->ApplyLinearImpulse(10 * strength, m_body->GetWorldCenter(), true);
 }
 
 void Soldier::setoff()
@@ -47,7 +48,7 @@ qreal Soldier::getRadius() const
     return m_radius;
 }
 
-double Soldier::getSize() const
+qreal Soldier::getSize() const
 {
     return m_size;
 }
@@ -55,20 +56,19 @@ double Soldier::getSize() const
 void Soldier::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
     painter->setPen(Qt::NoPen);
-//    painter->setBrush(side == e_RED ? Qt::red : Qt::black);
     painter->setBrush(getColor());
-//    painter->drawEllipse(-0.8 * radius, -1.0 * radius, 1.6 * radius, 2.0 * radius);
-//    painter->drawRect(-radius, -radius, 2 * radius, 2 * radius);
     painter->drawEllipse(-m_radius, -m_radius, 2.0 * m_radius, 2.0 * m_radius);
-//    painter->drawEllipse(0, 0, 2.0 * radius, 2.0 * radius);
+    painter->scale(1, -1);
+    painter->setPen(Qt::black);
+    painter->drawText(-11, -25, QString::number(m_life));
 }
 
-double Soldier::getPower() const
+qreal Soldier::getPower() const
 {
     return m_power;
 }
 
-void Soldier::setPower(double value)
+void Soldier::setPower(qreal value)
 {
     m_power = value;
 }
@@ -97,12 +97,12 @@ void Soldier::takeDamage(int damage)
     }
 }
 
-RedSoldier::RedSoldier(int life_, double size_, b2Body *body_) :
+RedSoldier::RedSoldier(int life_, qreal size_, b2Body *body_) :
     Soldier(e_RED, life_, size_, body_)
 {
 }
 
-BlackSoldier::BlackSoldier(int life_, double size_, b2Body *body_) :
+BlackSoldier::BlackSoldier(int life_, qreal size_, b2Body *body_) :
     Soldier(e_BLACK, life_, size_, body_)
 {
 }

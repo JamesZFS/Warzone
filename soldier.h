@@ -16,7 +16,7 @@ struct SoldierDef
 {
     Side side;
     int life;
-    double size;    // power and mass is proposionate to size
+    qreal size;    // power and mass is proposionate to size
     b2Vec2 position;    // world coord center
 
     SoldierDef()
@@ -43,16 +43,16 @@ class Soldier : public Actor
 {
     Q_OBJECT
 public:
-    Soldier(Side side, int life, double size, b2Body *body);
+    Soldier(Side side, int life, qreal size, b2Body *body);
 
     int getLife() const;
-    double getPower() const;
+    qreal getPower() const;
     void setLife(int value);
     void takeDamage(int damage);
-    void setPower(double value);
+    void setPower(qreal value);
     b2Body *getBody() const;
     qreal getRadius() const;
-    double getSize() const;
+    qreal getSize() const;
 
     /**
      * @brief move
@@ -86,9 +86,9 @@ private:
     /** attack ability
      * the greater power, the more clumsy a soldier is (larger mass)
      */
-    double m_power;
+    qreal m_power;
 
-    const double m_size;  // real size
+    const qreal m_size;  // real size
 
     const qreal m_radius; // radius on the screen
 
@@ -103,7 +103,7 @@ public:
 class RedSoldier : public Soldier
 {
 public:
-    RedSoldier(int life_, double size_, b2Body *body_);
+    RedSoldier(int life_, qreal size_, b2Body *body_);
 
     // Soldier interface
 protected:
@@ -113,7 +113,7 @@ protected:
 class BlackSoldier : public Soldier
 {
 public:
-    BlackSoldier(int life_, double size_, b2Body *body_);
+    BlackSoldier(int life_, qreal size_, b2Body *body_);
 
     // Soldier interface
 protected:

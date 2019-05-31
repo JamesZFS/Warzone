@@ -1,11 +1,13 @@
 #ifndef GAMESYSTEM_H
 #define GAMESYSTEM_H
 
-#include <QObject>
 #include "defs.h"
 #include "soldier.h"
 #include "land.h"
 #include "weapon.h"
+
+#include <QObject>
+#include <QSet>
 
 class Engine;
 class QGraphicsScene;
@@ -73,15 +75,16 @@ private:
     b2World *m_world;
     Land *m_land;
     // red side v.s. black side
-    QVector<RedSoldier *> m_R_units;
-    QVector<BlackSoldier *> m_B_units;
+    QSet<RedSoldier *> m_R_units;
+    QSet<BlackSoldier *> m_B_units;
     b2ParticleSystem *m_water_system;
     Soldier *m_cur_unit;  // current moving unit
     Weapon *m_cur_weapon;   // current selected weapon
 
     // game params:
     Side m_cur_player;
-    size_t m_prev_R_unit_index, m_prev_B_unit_index;
+    QSet<RedSoldier*>::const_iterator m_R_iter;
+    QSet<BlackSoldier*>::const_iterator m_B_iter;
     qreal m_world_size;  // half physical world size, the world is ranged (-size, size)^2
     GameState m_game_state;
     Engine *m_proxy_engine;  // proxy simulator
