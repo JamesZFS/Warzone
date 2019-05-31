@@ -16,7 +16,7 @@ public:
     };
     enum State { e_COMMON, e_LAUNCHED, e_TRIGGERED };
 
-    Weapon(b2Body *body);
+    Weapon(b2Body *body, float32 power_ratio);
     ~Weapon() = default;
 
     bool isLaunched() const;
@@ -34,6 +34,7 @@ protected:
 
     State m_state;
     b2Vec2 m_dir;   // both direction and strength is stored
+    const float32 m_power_ratio;  // adjust power according to soldier's size
 
 signals:
     void launched();    // emitted right after launching
@@ -45,7 +46,7 @@ class ContactWeapon : public Weapon // will trigger when hit something
 {
     Q_OBJECT
 public:
-    ContactWeapon(b2Body *body) : Weapon(body) {}
+    ContactWeapon(b2Body *body, float32 power_ratio) : Weapon(body, power_ratio) {}
     virtual qreal threasholdV() const = 0;
 };
 
@@ -53,7 +54,7 @@ class TimingWeapon : public Weapon
 {
     Q_OBJECT
 public:
-    TimingWeapon(b2Body *body) : Weapon(body) {}
+    TimingWeapon(b2Body *body, float32 power_ratio) : Weapon(body, power_ratio) {}
     virtual qreal threasholdT() const = 0;
 };
 
@@ -61,7 +62,7 @@ class Bazooka : public ContactWeapon
 {
     Q_OBJECT
 public:
-    Bazooka(b2Body *body);
+    Bazooka(b2Body *body, float32 power_ratio);
 
     // QGraphicsItem interface
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;

@@ -6,7 +6,8 @@
 #include "defs.h"
 #include "gamesystem.h"
 
-//class GameSystem;
+class GameSystem;
+class FrontSight;
 
 namespace Ui {
 class MainWindow;
@@ -38,7 +39,16 @@ private slots:
 private:
 
     Ui::MainWindow *ui;
-    GameSystem *m_gamesystem;
+    GameSystem *m_gamesystem;   // backend
+
+    // game params:
+    Weapon::Type m_weapon_type;
+    qreal m_aim_angle;
+    FrontSight *m_fs;
+
+    // QWidget interface
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
 #endif // MAINWINDOW_H

@@ -31,18 +31,13 @@ void GameSystem::start()
     m_cur_player = e_RED; // let the red operate first
     m_R_iter = m_R_units.constBegin();
     m_B_iter = m_B_units.constBegin();
-    m_cur_unit = *m_R_iter;
+    setCurUnit(*m_R_iter);
     m_cur_weapon = nullptr;
     m_proxy_engine = new Engine(this, m_world);
     m_kill_list.clear();
     connect(m_proxy_engine, SIGNAL(requiresUpdate()), this, SLOT(advanceScene()));
     connect(m_proxy_engine, SIGNAL(finished(quint32)), this, SLOT(onSimulationFinished(quint32)));
     simulateThen(&GameSystem::waitForOperation);
-}
-
-void GameSystem::end()
-{
-    // todo
 }
 
 QGraphicsScene *GameSystem::getScene() const
@@ -76,6 +71,10 @@ void GameSystem::resetWorld()
     m_R_units.clear();
     m_B_units.clear();
     m_cur_unit = nullptr;
+    foreach (auto item, m_ext_item) {
+        m_scene->removeItem(item);
+    }
+    m_ext_item.clear();
     m_scene->clear();
 }
 
@@ -97,7 +96,7 @@ void GameSystem::initWorld()
     for (int i = 0; i < GameConsts::max_n_unit; ++i) {
         SoldierDef def;
         def.life = 100;
-        def.size = 0.5 + i * 0.2;
+        def.size = 0.5 + i * 0.2;   // 0.5 - 1.5
         def.position.Set(randf(-m_world_size * 0.8, +m_world_size * 0.8), 2);
         def.side = e_RED;
         createSoldier(def);
@@ -166,8 +165,16 @@ void GameSystem::createSoldier(const SoldierDef &unit_def)
 
 void GameSystem::setoffSoldier(Soldier *unit)
 {
-    qDebug("  setoff a unit");
     unit->setoff();
+}
+
+void GameSystem::setCurUnit(Soldier *unit)
+{
+    m_cur_unit = unit;
+    m_cur_unit->setCurrent(true);
+    m_cur_unit->advance(1);
+    emit setLabelPrompt("Unit Life");
+    emit setLCDNumber(unit->getLife());
 }
 
 Side GameSystem::checkWhoWins()
@@ -210,12 +217,12 @@ void GameSystem::switchPlayer()
     switch (m_cur_player) {
     case e_RED:
         m_cur_player = e_BLACK;
-        m_cur_unit = *m_B_iter;     // focus on the next unit
+        setCurUnit(*m_B_iter);     // focus on the next unit
         if (++m_B_iter == m_B_units.end()) m_B_iter = m_B_units.begin();
         break;
     case e_BLACK:
         m_cur_player = e_RED;
-        m_cur_unit = *m_R_iter;     // focus on the next unit
+        setCurUnit(*m_R_iter);     // focus on the next unit
         if (++m_R_iter == m_R_units.end()) m_R_iter = m_R_units.begin();
         break;
     default:
@@ -234,6 +241,18 @@ GameSystem::GameState GameSystem::getGamestate() const
 bool GameSystem::isOperational() const
 {
     return m_game_state == e_OPERATIONAL;
+}
+
+void GameSystem::addToScene(QGraphicsItem *item)
+{
+    m_scene->addItem(item);
+    m_ext_item.insert(item);
+}
+
+void GameSystem::removeFromScene(QGraphicsItem *item)
+{
+    m_scene->removeItem(item);
+    m_ext_item.remove(item);
 }
 
 void GameSystem::moveCurUnit(const b2Vec2 &strength)
@@ -318,10 +337,17 @@ void GameSystem::onSoldierDied()
     m_kill_list.insert(who);
 }
 
+const Soldier *GameSystem::getCurUnit() const
+{
+    return m_cur_unit;
+}
+
 void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
 {
     Q_ASSERT(m_game_state == e_OPERATIONAL);
     Q_ASSERT(!m_cur_weapon);
+    m_cur_unit->setCurrent(false);
+    emit setLCDNumber(0);
 
     b2BodyDef def;
     b2Vec2 dir = strength / strength.Length();
@@ -332,7 +358,7 @@ void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
     auto weapon_body = m_world->CreateBody(&def);
     switch (weapon) {
     case Weapon::e_BAZOOKA:
-        m_cur_weapon = new Bazooka(weapon_body);
+        m_cur_weapon = new Bazooka(weapon_body, m_cur_unit->getPower());
         break;
     default:
         qFatal("Weapon not implemented!");

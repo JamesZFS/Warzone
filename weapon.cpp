@@ -4,7 +4,8 @@
 #include <QPainter>
 
 
-Weapon::Weapon(b2Body *body) : Actor(body), m_state(e_COMMON)
+Weapon::Weapon(b2Body *body, float32 power_ratio) :
+    Actor(body), m_state(e_COMMON), m_power_ratio(power_ratio)
 {
     body->SetType(b2_dynamicBody);
     body->SetBullet(true);          // default - fast moving object
@@ -37,7 +38,7 @@ void Weapon::setoff()
     emit triggered(); // the destruction of the weapon should be handled by system
 }
 
-Bazooka::Bazooka(b2Body *body) : ContactWeapon(body)
+Bazooka::Bazooka(b2Body *body, float32 power_ratio) : ContactWeapon(body, power_ratio)
 {
     Q_ASSERT(!body->GetFixtureList());
     body->SetGravityScale(2.0);
@@ -72,5 +73,5 @@ void Bazooka::trigger() // called when cannon hits something
     if (m_state != e_LAUNCHED) return;  // trigger only once
     m_state = e_TRIGGERED;
     // make an explosion
-    Explosion::create(m_body, 8, 50);
+    Explosion::create(m_body, 8 * m_power_ratio, 50 * m_power_ratio);
 }

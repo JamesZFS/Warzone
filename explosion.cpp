@@ -16,10 +16,11 @@ bool Explosion::ReportFixture(b2Fixture *fixture)
     float32 distance;
     b2Vec2 normal;
     fixture->ComputeDistance(m_center, &distance, &normal, 0);
+    distance -= fixture->GetShape()->m_radius;
     float32 k = distance / m_rad;
     if (k > 1) return true;  // no effect outside rad
 
-    b2Vec2 dir = body->GetPosition() - m_center + b2Vec2(0, randf(0, 2));
+    b2Vec2 dir = -normal + b2Vec2(randf(-0.1, 0.1), randf(-0.1, 0.1));
     dir.Normalize();
     float32 f = k < 0.1 ? m_power : m_power * (1.0 - k) / 0.9;
 

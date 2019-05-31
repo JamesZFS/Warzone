@@ -34,7 +34,8 @@ SOURCES += \
     actor.cpp \
     weapon.cpp \
     contactlistener.cpp \
-    explosion.cpp
+    explosion.cpp \
+    frontsight.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -47,7 +48,8 @@ HEADERS += \
     actor.h \
     weapon.h \
     contactlistener.h \
-    explosion.h
+    explosion.h \
+    frontsight.h
 
 FORMS += \
         mainwindow.ui

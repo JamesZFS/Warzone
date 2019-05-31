@@ -21,7 +21,7 @@ public:
 
     enum GameState
     {
-        e_COMMON,   // before game start
+        e_COMMON,   // neither operational nor during a simualtion
         e_OPERATIONAL,
         e_SIMULAING,
         e_PAUSED,
@@ -31,7 +31,6 @@ public:
     ~GameSystem();
 
     void start();
-    void end();
 
     // step the system until next key event (when everything is static)
     void simulateThen(FunPtr next);
@@ -46,6 +45,12 @@ public:
     GameState getGamestate() const;
     bool isOperational() const;
 
+    // scene extension:
+    void addToScene(QGraphicsItem *item);
+    void removeFromScene(QGraphicsItem *item);
+
+    const Soldier *getCurUnit() const;
+
 signals:
     void unitKilled(QString msg);
     void unitHurt(int damage);
@@ -53,6 +58,8 @@ signals:
     void playerChanged(Side side);
     void beginSimulating();
     void gameOver(Side winner);
+    void setLabelPrompt(QString prompt);
+    void setLCDNumber(int number);
 
 protected:
     void resetWorld();
@@ -60,6 +67,7 @@ protected:
     void createLand();
     void createSoldier(const SoldierDef &unit_def);
     void setoffSoldier(Soldier *unit);
+    void setCurUnit(Soldier *unit);
     Side checkWhoWins();  // if either side runs out of soldiers, then the other side wins
     void setGameOver(Side winner);
 
@@ -98,6 +106,8 @@ private:
     FunPtr m_after_simulation;   // call this after simulation
 
     QSet<Soldier*> m_kill_list;   // kill soldiers after simulation
+
+    QSet<QGraphicsItem *> m_ext_item;  // user defined items, will not be cleared
 };
 
 #endif // GAMESYSTEM_H

@@ -43,6 +43,13 @@ class Soldier : public Actor
 {
     Q_OBJECT
 public:
+    enum State
+    {
+        e_COMMON,
+        e_CURRENT_FIRST,
+        e_CURRENT
+    };
+
     Soldier(Side side, int life, qreal size, b2Body *body);
 
     int getLife() const;
@@ -53,6 +60,8 @@ public:
     b2Body *getBody() const;
     qreal getRadius() const;
     qreal getSize() const;
+    inline bool isCurrent() const { return m_state != e_COMMON; }
+    void setCurrent(bool flag);
 
     /**
      * @brief move
@@ -91,6 +100,8 @@ private:
     const qreal m_size;  // real size
 
     const qreal m_radius; // radius on the screen
+
+    State m_state;
 
 protected:
     virtual const QColor getColor() = 0;
