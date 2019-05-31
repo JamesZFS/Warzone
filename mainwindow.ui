@@ -146,6 +146,9 @@
    <property name="text">
     <string>start</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

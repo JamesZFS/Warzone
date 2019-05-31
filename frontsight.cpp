@@ -2,21 +2,11 @@
 
 #include <QPainter>
 
-FrontSight::FrontSight(const QPointF &center) :
-    m_angle(0), m_bbox(20, -10, 20, 20), m_center(center)
+
+FrontSight::FrontSight() :
+    m_bbox(20, -10, 20, 20)
 {
 
-}
-
-qreal FrontSight::angle() const
-{
-    return m_angle;
-}
-
-void FrontSight::setAngle(const qreal &angle)
-{
-    m_angle = angle;
-    setRotation(angle);
 }
 
 QRectF FrontSight::boundingRect() const
@@ -27,10 +17,11 @@ QRectF FrontSight::boundingRect() const
 void FrontSight::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
     QPolygonF tri;
+    tri << QPointF(0, 3) << QPointF(-2, 10) << QPointF(2, 10);
     painter->save();
     painter->translate(30, 0);
-    tri << QPointF(0, 3) << QPointF(-2, 10) << QPointF(2, 10);
     painter->setBrush(QColor(180, 190, 250));
+    painter->rotate(45);
     painter->drawPolygon(tri);
     painter->rotate(90);
     painter->drawPolygon(tri);
@@ -39,5 +30,44 @@ void FrontSight::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWid
     painter->rotate(90);
     painter->drawPolygon(tri);
     painter->restore();
-    setPos(m_center);
+}
+
+ChargingFrontSight::ChargingFrontSight() :
+    FrontSight(), m_anim(this, "charge")
+{
+    m_bbox = QRectF(0, -10, 30, 20);
+    m_anim.setStartValue(0.0);
+    m_anim.setEndValue(1.0);
+    m_anim.setDuration(2000);   // 2s
+}
+
+void ChargingFrontSight::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+{
+    QPolygonF p;
+    p << QPointF(0, 3) << QPointF(0, -3)
+      << QPointF(30 * m_charge, -7 * m_charge - 3)
+      << QPointF(30 * m_charge, 7 * m_charge + 3);
+    painter->setBrush(Qt::yellow);
+    painter->drawPolygon(p);
+}
+
+qreal ChargingFrontSight::charge() const
+{
+    return m_charge;
+}
+
+void ChargingFrontSight::setCharge(qreal charge)
+{
+    m_charge = charge;
+    update();
+}
+
+void ChargingFrontSight::startAnimation()
+{
+    m_anim.start();
+}
+
+void ChargingFrontSight::stopAnimation()
+{
+    m_anim.stop();
 }

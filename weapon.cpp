@@ -65,7 +65,7 @@ void Bazooka::launch()  // fire cannon
     Q_ASSERT(m_state == e_COMMON);
     m_state = e_LAUNCHED;
     // give it an initial linear velocity
-    m_body->SetLinearVelocity(10 * m_dir);
+    m_body->SetLinearVelocity(100 * m_dir);
 }
 
 void Bazooka::trigger() // called when cannon hits something

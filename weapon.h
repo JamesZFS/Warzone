@@ -13,6 +13,7 @@ public:
         e_BAZOOKA,
         e_GRENADE,
         e_SHOTGUN,
+        e_NONE,
     };
     enum State { e_COMMON, e_LAUNCHED, e_TRIGGERED };
 

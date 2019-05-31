@@ -12,10 +12,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow),
     m_gamesystem(new GameSystem),
-    m_fs(nullptr)
+    m_fs(nullptr), m_cfs(nullptr)
 {
     ui->setupUi(this);
     connect(ui->bt_start, SIGNAL(clicked()), ui->actionstart, SLOT(trigger()));
+    connect(ui->actionstart, SIGNAL(triggered(bool)), this, SLOT(onActionstartTriggered()));
 
     // graphics view
     auto &view = *ui->graphics_view;
@@ -43,8 +44,12 @@ MainWindow::~MainWindow()
     m_gamesystem->deleteLater();
 }
 
-void MainWindow::on_actionstart_triggered()
+void MainWindow::onActionstartTriggered()
 {
+    destroyFS();
+    m_pressed_key = 0;
+    m_aim_angle = 0;
+    m_weapon_type = Weapon::e_NONE;
     m_gamesystem->start();
 }
 
@@ -56,6 +61,14 @@ void MainWindow::on_bt_move_clicked()
 //    m_gamesystem->moveCurUnit(b2Vec2(1, 1));
 }
 
+void MainWindow::on_bt_fire_clicked()
+{
+    if (!m_gamesystem->isOperational()) return;
+    ui->label->setText("firing...");
+    m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(randf(-0.1, 0.1), randf(1, 2)));
+    //    m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(1, 1));
+}
+
 void MainWindow::onWaitingOperation(Side side)
 {
     auto msg = QString("listening for %1 operation...").arg(side == e_RED ? "red" : "black");
@@ -63,9 +76,11 @@ void MainWindow::onWaitingOperation(Side side)
     ui->bt_move->setEnabled(true);
     ui->bt_fire->setEnabled(true);
     m_weapon_type = Weapon::e_BAZOOKA;
-    m_aim_angle = 0;
+    m_pressed_key = 0;
     Q_ASSERT(!m_fs);
-    m_fs = new FrontSight(m_gamesystem->getCurUnit()->pos());
+    m_fs = new FrontSight;
+    m_fs->setPos(m_gamesystem->getCurUnit()->pos());
+    m_fs->setRotation(m_aim_angle);
     m_gamesystem->addToScene(m_fs);
 }
 
@@ -73,14 +88,6 @@ void MainWindow::onSimulating()
 {
     ui->bt_move->setEnabled(false);
     ui->bt_fire->setEnabled(false);
-}
-
-void MainWindow::on_bt_fire_clicked()
-{
-    if (!m_gamesystem->isOperational()) return;
-    ui->label->setText("firing...");
-    m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(randf(-0.1, 0.1), randf(1, 2)));
-    //    m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(1, 1));
 }
 
 void MainWindow::onUnitHurt(int damage)
@@ -97,55 +104,153 @@ void MainWindow::onGameOver(Side winner)
     QMessageBox::information(this, "Game Over", msg, QMessageBox::Ok);
 }
 
+void MainWindow::aimUp()
+{
+    if (-90 < m_aim_angle && m_aim_angle < 90) m_aim_angle = qMin(m_aim_angle + 0.9, 89.99);
+    else m_aim_angle = qMax(m_aim_angle - 0.9, 90.01);
+    m_fs->setRotation(m_aim_angle);
+}
+
+void MainWindow::aimDown()
+{
+    if (-90 < m_aim_angle && m_aim_angle < 90) m_aim_angle = qMax(m_aim_angle - 0.9, -89.99);
+    else m_aim_angle = qMin(m_aim_angle + 0.9, 269.99);
+    m_fs->setRotation(m_aim_angle);
+}
+
+void MainWindow::turnLeft()
+{
+    if (-90 < m_aim_angle && m_aim_angle < 90) {
+        m_aim_angle = 180 - m_aim_angle;
+        m_fs->setRotation(m_aim_angle);
+    }
+}
+
+void MainWindow::turnRight()
+{
+    if (90 < m_aim_angle && m_aim_angle < 270) {
+        m_aim_angle = 180 - m_aim_angle;
+        m_fs->setRotation(m_aim_angle);
+    }
+}
+
+void MainWindow::charge()
+{
+    m_charge = qMin(m_charge + 0.005, 1.0);
+}
+
+void MainWindow::keepDoing(MainWindow::FunPtr what)
+{
+    Q_ASSERT(!m_timer.isActive());
+    disconnect(&m_timer, &QTimer::timeout, 0, 0);
+    connect(&m_timer, &QTimer::timeout, this, what);
+    m_timer.start(10);
+}
+
+void MainWindow::destroyFS()
+{
+    m_gamesystem->removeFromScene(m_fs);
+    delete m_fs;
+    m_fs = nullptr;
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    if (!m_gamesystem->isOperational()) return;
-
-    auto angle = qDegreesToRadians(m_aim_angle);
+    if (!m_gamesystem->isOperational() || m_pressed_key != 0) {
+        event->ignore();
+        return; // listen for the first key
+    }
+    qDebug() << "press:" << QKeySequence(event->key());
+    m_pressed_key = event->key();
     switch (event->key()) {
 
     // fire
     case Qt::Key_K:
     case Qt::Key_Space:
-        m_gamesystem->removeFromScene(m_fs);
-        delete m_fs;
-        m_fs = nullptr;
-        m_gamesystem->fireCurUnit(m_weapon_type, 2 * b2Vec2(cos(angle), sin(angle)));
+    {
+        Q_ASSERT(!m_cfs);
+        m_cfs = new ChargingFrontSight;
+        m_cfs->setPos(m_gamesystem->getCurUnit()->pos());
+        m_cfs->setRotation(m_aim_angle);
+        m_gamesystem->addToScene(m_cfs);
+        m_cfs->startAnimation();
+        m_charge = 0;
+        keepDoing(&MainWindow::charge);
         break;
+    }
 
     // jump
     case Qt::Key_J:
     case Qt::Key_Return:
     case Qt::Key_Enter:
-        m_gamesystem->removeFromScene(m_fs);
-        delete m_fs;
-        m_fs = nullptr;
+    {
+        destroyFS();
+        auto angle = qDegreesToRadians(m_aim_angle);
         m_gamesystem->moveCurUnit(2 * b2Vec2(cos(angle), sin(angle)));
         break;
+    }
 
     // aim
     case Qt::Key_W:
-        m_aim_angle += 10;
-        m_fs->setAngle(m_aim_angle);
+    case Qt::Key_Up:
+        keepDoing(&MainWindow::aimUp);
         break;
+
     case Qt::Key_S:
-        m_aim_angle -= 10;
-        m_fs->setAngle(m_aim_angle);
+    case Qt::Key_Down:
+        keepDoing(&MainWindow::aimDown);
         break;
 
     case Qt::Key_A:
-//        if (m_aim_angle > 90 || m_aim_angle < -90) break;
-        m_aim_angle = 180 - m_aim_angle;
-        m_fs->setAngle(m_aim_angle);
+    case Qt::Key_Left:
+        turnLeft();
         break;
 
     case Qt::Key_D:
-//        if (m_aim_angle < 90 || m_aim_angle > -90) break;
-        m_aim_angle = 180 - m_aim_angle;
-        m_fs->setAngle(m_aim_angle);
+    case Qt::Key_Right:
+        turnRight();
         break;
 
     default:
         break;
     }
+    event->accept();
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
+    if (!m_gamesystem->isOperational() || m_pressed_key != event->key()) {
+        event->ignore();
+        return;
+    }
+    qDebug() << "release:" << QKeySequence(event->key());
+    m_pressed_key = 0;
+    switch (event->key()) {
+    // fire
+    case Qt::Key_K:
+    case Qt::Key_Space:
+    {
+        m_cfs->stopAnimation();
+        m_gamesystem->removeFromScene(m_cfs);
+        delete m_cfs;
+        m_cfs = nullptr;
+        m_timer.stop();
+        destroyFS();
+        auto angle = qDegreesToRadians(m_aim_angle);
+        m_gamesystem->fireCurUnit(m_weapon_type, m_charge * b2Vec2(cos(angle), sin(angle)));
+        break;
+    }
+
+    // aim
+    case Qt::Key_W:
+    case Qt::Key_Up:
+    case Qt::Key_S:
+    case Qt::Key_Down:
+        m_timer.stop();
+        break;
+
+    default:
+        break;
+    }
+    event->accept();
 }
