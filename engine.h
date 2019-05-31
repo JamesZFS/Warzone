@@ -29,12 +29,13 @@ private slots:
     void stepWorld();
 
 private:
-    bool worldIsChanging() const;
+    bool worldIsChanging();
     void dumpTrash();
 
     b2World *m_world;
     QTimer *m_timer;
     quint32 m_n_iter;
+    quint32 m_n_static_iter;
     QStack<Actor*> m_trash; // will release these bodies after simulation
 };
 

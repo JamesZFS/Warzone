@@ -1,5 +1,5 @@
 #include "soldier.h"
-//#include <Box2D/Box2D.h>
+#include "explosion.h"
 #include <QPainter>
 
 Soldier::Soldier(Side side, int life, double size, b2Body *body) :
@@ -16,7 +16,12 @@ Soldier::Soldier(Side side, int life, double size, b2Body *body) :
     // fixture created after body
     b2CircleShape shape;
     shape.m_radius = size;
-    m_body->CreateFixture(&shape, GameConsts::soldier_density)->SetFriction(0.4);
+    b2FixtureDef fix_def;
+    fix_def.shape = &shape;
+    fix_def.density = GameConsts::soldier_density;
+    fix_def.friction = 0.4;
+    fix_def.restitution = 0.2;
+    m_body->CreateFixture(&fix_def);
 
     m_bbox = QRectF(-m_radius - 1, -m_radius - 1, 2 * (m_radius + 1), 2 * (m_radius + 1));
 }
@@ -29,6 +34,12 @@ b2Body *Soldier::getBody() const
 void Soldier::jump(const b2Vec2 &strength)
 {
     m_body->ApplyLinearImpulse(5 * strength, m_body->GetWorldCenter(), true);
+}
+
+void Soldier::setoff()
+{
+    Explosion::create(m_body, 3, 30);
+    emit triggered();
 }
 
 qreal Soldier::getRadius() const
@@ -70,6 +81,20 @@ int Soldier::getLife() const
 void Soldier::setLife(int value)
 {
     m_life = value;
+}
+
+void Soldier::takeDamage(int damage)
+{
+    Q_ASSERT(damage >= 0);
+    if (m_life > damage) {
+        m_life -= damage;
+        emit hurt(damage);
+    }
+    else {
+        m_life = 0;
+        emit hurt(m_life);
+        emit died();    // handled by system
+    }
 }
 
 RedSoldier::RedSoldier(int life_, double size_, b2Body *body_) :

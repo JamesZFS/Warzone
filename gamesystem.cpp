@@ -28,16 +28,16 @@ void GameSystem::start()
     resetWorld();
     initWorld();
     m_scene->setSceneRect(-10 * m_world_size, -10 * m_world_size, 20 * m_world_size, 20 * m_world_size);
-    m_game_state = e_OPERATIONAL;
     m_cur_player = e_RED; // let the red operate first
     m_prev_R_unit_index = 0;
     m_prev_B_unit_index = -1;
     m_cur_unit = m_R_units[m_prev_R_unit_index];
     m_cur_weapon = nullptr;
     m_proxy_engine = new Engine(this, m_world);
+    m_kill_list.clear();
     connect(m_proxy_engine, SIGNAL(requiresUpdate()), this, SLOT(advanceScene()));
-    connect(m_proxy_engine, SIGNAL(finished(quint32)), this, SLOT(onSimulationFinished()));
-    emit requireOperation(m_cur_player);
+    connect(m_proxy_engine, SIGNAL(finished(quint32)), this, SLOT(onSimulationFinished(quint32)));
+    simulateThen(&GameSystem::waitForOperation);
 }
 
 void GameSystem::end()
@@ -45,39 +45,18 @@ void GameSystem::end()
     // todo
 }
 
-void GameSystem::nextPlayer()
-{
-//    Q_ASSERT(gamestatus == e_OPERATIONAL);
-    switch (m_cur_player) {
-    case e_RED:
-        m_cur_player = e_BLACK;
-        m_prev_B_unit_index = (m_prev_B_unit_index + 1) % GameConsts::max_n_unit;
-        m_cur_unit = m_B_units[m_prev_B_unit_index];     // focus on the next unit
-        break;
-    case e_BLACK:
-        m_cur_player = e_RED;
-        m_prev_R_unit_index = (m_prev_R_unit_index + 1) % GameConsts::max_n_unit;
-        m_cur_unit = m_R_units[m_prev_R_unit_index];
-        break;
-    default:
-        qFatal("invalid cur_player value!");
-        break;
-    }
-    m_game_state = e_OPERATIONAL;
-    emit playerChanged(m_cur_player);
-    emit requireOperation(m_cur_player); // wait for next user's operation
-}
-
 QGraphicsScene *GameSystem::getScene() const
 {
     return m_scene;
 }
 
-void GameSystem::simulate()
+void GameSystem::simulateThen(FunPtr next)
 {
     qDebug("Simulating...");
+    // remake async connection
+    m_after_simulation = next;
     m_game_state = e_SIMULAING;   // lock operation
-    // begin simulating
+    emit beginSimulating();
     m_proxy_engine->doSimulation();
 }
 
@@ -145,6 +124,8 @@ void GameSystem::createLand()
     b2PolygonShape land_shape;
     land_shape.SetAsBox(m_world_size, 10);
     land_body->CreateFixture(&land_shape, 0);
+    land_shape.SetAsBox(m_world_size, 1, b2Vec2(0, 30), 0);
+    land_body->CreateFixture(&land_shape, 0);
     land_shape.SetAsBox(1, 20, b2Vec2(-m_world_size + 1, 10), 0);
     land_body->CreateFixture(&land_shape, 0);
     land_shape.SetAsBox(1, 20, b2Vec2(+m_world_size - 1, 10), 0);
@@ -178,31 +159,16 @@ void GameSystem::createSoldier(const SoldierDef &unit_def)
     default:
         qFatal("invalid side value!");
     }
+    connect(unit, SIGNAL(hurt(int)), this, SLOT(onSoldierHurt(int)));
+    connect(unit, SIGNAL(died()), this, SLOT(onSoldierDied()));
+    connect(unit, SIGNAL(triggered()), this, SLOT(destroySoldier()));
     m_scene->addItem(unit);
 }
 
-void GameSystem::killSoldier(Soldier *unit)
+void GameSystem::setoffSoldier(Soldier *unit)
 {
-    int id;
-    switch (unit->m_side) {
-    case e_RED:
-        id = m_R_units.indexOf(static_cast<RedSoldier*>(unit));
-        m_R_units.erase(m_R_units.begin() + id);
-        Q_ASSERT(id >= 0);  // must be found
-        emit unitKilled(QString("Red has lost a unit!"));
-        break;
-    case e_BLACK:
-        id = m_B_units.indexOf(static_cast<BlackSoldier*>(unit));
-        m_B_units.erase(m_B_units.begin() + id);
-        Q_ASSERT(id >= 0);  // must be found
-        emit unitKilled(QString("Black has lost a unit!"));
-        break;
-    default:
-        qFatal("invalid unit side!");
-    }
-    m_world->DestroyBody(unit->body());
-    m_scene->removeItem(unit);
-    delete unit;
+    qDebug("  setoff a unit");
+    unit->setoff();
 }
 
 void GameSystem::advanceScene()
@@ -211,11 +177,32 @@ void GameSystem::advanceScene()
     m_scene->advance();
 }
 
-void GameSystem::waitForOperation(quint32 n_iter)
+void GameSystem::waitForOperation()
 {
-    m_game_state = e_OPERATIONAL;
-    qDebug() << QString("simulation finished in %1 iters").arg(n_iter);
+    Q_ASSERT(m_game_state == e_OPERATIONAL);
     emit requireOperation(m_cur_player);
+}
+
+void GameSystem::switchPlayer()
+{
+    Q_ASSERT(m_game_state == e_OPERATIONAL);
+    switch (m_cur_player) {
+    case e_RED:
+        m_cur_player = e_BLACK;
+        m_prev_B_unit_index = (m_prev_B_unit_index + 1) % GameConsts::max_n_unit;
+        m_cur_unit = m_B_units[m_prev_B_unit_index];     // focus on the next unit
+        break;
+    case e_BLACK:
+        m_cur_player = e_RED;
+        m_prev_R_unit_index = (m_prev_R_unit_index + 1) % GameConsts::max_n_unit;
+        m_cur_unit = m_R_units[m_prev_R_unit_index];
+        break;
+    default:
+        qFatal("invalid cur_player value!");
+        break;
+    }
+    emit playerChanged(m_cur_player);
+    emit requireOperation(m_cur_player); // wait for next user's operation
 }
 
 GameSystem::GameState GameSystem::getGamestate() const
@@ -233,24 +220,79 @@ void GameSystem::moveCurUnit(const b2Vec2 &strength)
     Q_ASSERT(m_game_state == e_OPERATIONAL);
     m_cur_unit->jump(strength);
 
-    disconnect(m_proxy_engine, SIGNAL(finished(quint32)), 0, 0);
-    connect(m_proxy_engine, SIGNAL(finished(quint32)), this, SLOT(waitForOperation(quint32)));  // async operation
-    simulate();
+    simulateThen(&GameSystem::waitForOperation);
 }
 
-void GameSystem::destroyCurWeapon()
+void GameSystem::destroyWeapon()
 {
-    if (!m_cur_weapon) return;
+//    if (!m_cur_weapon) return;
 //    m_scene->removeItem(m_cur_weapon);
-    m_proxy_engine->discard(m_cur_weapon);
-//    delete m_cur_weapon;
+//    m_proxy_engine->discard(m_cur_weapon);
+//    qDebug("weapon destroyed");
     m_cur_weapon = nullptr;
-    qDebug("weapon destroyed");
+    auto weapon = qobject_cast<Weapon*>(sender());
+    Q_ASSERT(weapon);
+    m_scene->removeItem(weapon);
+    m_proxy_engine->discard(weapon);
 }
 
-void GameSystem::onSimulationFinished()
+void GameSystem::destroySoldier()
 {
-//    destroyCurWeapon();
+    auto unit = qobject_cast<Soldier*>(sender());
+    Q_ASSERT(unit);
+    qDebug("  a unit destroyed");
+    int id;
+    switch (unit->m_side) {
+    case e_RED:
+        id = m_R_units.indexOf(static_cast<RedSoldier*>(unit));
+        if (id < 0) return;
+        m_R_units.erase(m_R_units.begin() + id);
+        emit unitKilled(QString("Red has lost a unit!"));
+        break;
+    case e_BLACK:
+        id = m_B_units.indexOf(static_cast<BlackSoldier*>(unit));
+        if (id < 0) return;
+        m_B_units.erase(m_B_units.begin() + id);
+        emit unitKilled(QString("Black has lost a unit!"));
+        break;
+    default:
+        qFatal("invalid unit side!");
+    }
+    m_scene->removeItem(unit);
+    m_proxy_engine->discard(unit);  // safe delete
+}
+
+void GameSystem::onSimulationFinished(quint32 n_iter)
+{
+    qDebug() << QString("simulation finished in %1 iters").arg(n_iter);
+    m_game_state = e_COMMON;
+    // deal with dead units
+    if (m_kill_list.isEmpty()) {
+        m_game_state = e_OPERATIONAL;
+        (this->*m_after_simulation)();
+    }
+    else {
+        foreach (Soldier *unit, m_kill_list) {
+            setoffSoldier(unit);
+        }
+        m_kill_list.clear();
+        simulateThen(m_after_simulation);   // keep exploding until no one killed
+    }
+}
+
+void GameSystem::onSoldierHurt(int damage)
+{
+    auto who = qobject_cast<Soldier*>(sender());
+    emit unitHurt(damage);
+    Q_ASSERT(who);
+}
+
+void GameSystem::onSoldierDied()
+{
+    auto who = qobject_cast<Soldier*>(sender());
+    Q_ASSERT(who);
+    qDebug("  a unit life = 0");
+    m_kill_list.insert(who);
 }
 
 void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
@@ -275,14 +317,12 @@ void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
     }
     m_scene->addItem(m_cur_weapon);
 
-    connect(m_cur_weapon, SIGNAL(triggered()), this, SLOT(destroyCurWeapon()));
+    connect(m_cur_weapon, SIGNAL(triggered()), this, SLOT(destroyWeapon()));
 
     m_cur_weapon->aim(strength);
     m_cur_weapon->fire();
 
-    disconnect(m_proxy_engine, SIGNAL(finished(quint32)), 0, 0);
-    connect(m_proxy_engine, SIGNAL(finished(quint32)), this, SLOT(nextPlayer()));  // async switch player
-    simulate();
+    simulateThen(&GameSystem::switchPlayer);
 }
 
 Side GameSystem::getCurPlayer() const

@@ -1,8 +1,9 @@
 #include "explosion.h"
 #include "defs.h"
+#include "soldier.h"
 
 
-Explosion::Explosion(const b2Body *self, b2Vec2 center, float32 rad, float32 power) :
+Explosion::Explosion(const b2Body *self, const b2Vec2 &center, float32 rad, float32 power) :
     m_self(self), m_center(center), m_rad(rad), m_power(power)
 {
 }
@@ -10,7 +11,8 @@ Explosion::Explosion(const b2Body *self, b2Vec2 center, float32 rad, float32 pow
 bool Explosion::ReportFixture(b2Fixture *fixture)
 {
     auto body = fixture->GetBody();
-    if (body == m_self) return true;    // exclude itself
+    if (body == m_self || body->GetType() != b2_dynamicBody)
+        return true;  // exclude itself and statics
     float32 distance;
     b2Vec2 normal;
     fixture->ComputeDistance(m_center, &distance, &normal, 0);
@@ -21,6 +23,22 @@ bool Explosion::ReportFixture(b2Fixture *fixture)
     dir.Normalize();
     float32 f = k < 0.1 ? m_power : m_power * (1.0 - k) / 0.9;
 
-    body->ApplyLinearImpulse(dir * f, body->GetPosition(), true);   // push body outward
+    body->ApplyLinearImpulse(dir * f * 1.8, body->GetPosition(), true);   // push body outward
+
+    // do some damage
+    Soldier *unit = dynamic_cast<Soldier*>((Actor*)body->GetUserData());
+    if (!unit) return true; // not a soldier
+    unit->takeDamage(f);
+
     return true;
+}
+
+void Explosion::create(b2Body *self, float32 rad, float32 power)
+{
+    auto center = self->GetPosition();
+    Explosion callback(self, center, rad, power);
+    b2AABB aabb;
+    aabb.lowerBound = center - b2Vec2(rad, rad);
+    aabb.upperBound = center + b2Vec2(rad, rad);
+    self->GetWorld()->QueryAABB(&callback, aabb);
 }

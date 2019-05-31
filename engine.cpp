@@ -42,16 +42,23 @@ void Engine::stepWorld()
     emit requiresUpdate();  // will call parent's paint event
 }
 
-bool Engine::worldIsChanging() const
+bool Engine::worldIsChanging()
 {
     for (b2Body *body = m_world->GetBodyList(); body; body = body->GetNext()) {
         if (body->GetType() == b2_staticBody ||
                 !body->IsActive() ||
                 !body->IsAwake()) continue;
-        if (body->GetLinearVelocity().LengthSquared() > b2_epsilon)
+        if (body->GetLinearVelocity().LengthSquared() > b2_epsilon) {
+            m_n_static_iter = 0;
             return true;    // the world got something still moving
+        }
     }
-    return false;
+    if (++m_n_static_iter >= GameConsts::max_n_static_iter) {
+        m_n_static_iter = 0;
+        return false;
+    }
+    else
+        return true;
 }
 
 void Engine::dumpTrash()

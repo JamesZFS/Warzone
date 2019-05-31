@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "gamesystem.h"
 #include <Box2D/Box2D.h>
 #include <QGraphicsView>
 
@@ -23,7 +22,9 @@ MainWindow::MainWindow(QWidget *parent) :
     view.scale(0.8, -0.8);
 
     // game system logic
-    connect(m_gamesystem, SIGNAL(requireOperation(Side)), this, SLOT(listenOperation()));
+    connect(m_gamesystem, SIGNAL(requireOperation(Side)), this, SLOT(onWaitingOperation(Side)));
+    connect(m_gamesystem, SIGNAL(beginSimulating()), this, SLOT(onSimulating()));
+    connect(m_gamesystem, SIGNAL(unitHurt(int)), this, SLOT(onUnitHurt(int)));
 }
 
 MainWindow::~MainWindow()
@@ -40,20 +41,36 @@ void MainWindow::on_actionstart_triggered()
 void MainWindow::on_bt_move_clicked()
 {
     if (!m_gamesystem->isOperational()) return;
-    qDebug("moving...");
+    ui->label->setText("moving...");
     m_gamesystem->moveCurUnit(b2Vec2(randf(-1, 1), randf(0, 2)));
 //    m_gamesystem->moveCurUnit(b2Vec2(1, 1));
 }
 
-void MainWindow::listenOperation()
+void MainWindow::onWaitingOperation(Side side)
 {
-    qDebug("listening for operation...");
+    auto msg = QString("listening for %1 operation...").arg(side == e_RED ? "red" : "black");
+    qDebug() << msg;
+    ui->label->setText("listening...");
+    ui->bt_move->setEnabled(true);
+    ui->bt_fire->setEnabled(true);
+}
+
+void MainWindow::onSimulating()
+{
+    ui->bt_move->setEnabled(false);
+    ui->bt_fire->setEnabled(false);
 }
 
 void MainWindow::on_bt_fire_clicked()
 {
     if (!m_gamesystem->isOperational()) return;
-    qDebug("firing...");
+    ui->label->setText("firing...");
     m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(randf(-2, 2), randf(0, 2)));
-//    m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(1, 1));
+    //    m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(1, 1));
+}
+
+void MainWindow::onUnitHurt(int damage)
+{
+    ui->label->setText("A unit hurt");
+    ui->lcdNumber->display(damage);
 }

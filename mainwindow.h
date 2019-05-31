@@ -4,8 +4,9 @@
 #include <QWidget>
 #include <QtEvents>
 #include "defs.h"
+#include "gamesystem.h"
 
-class GameSystem;
+//class GameSystem;
 
 namespace Ui {
 class MainWindow;
@@ -24,9 +25,13 @@ private slots:
 
     void on_bt_move_clicked();
 
-    void listenOperation();
+    void onWaitingOperation(Side side);
+
+    void onSimulating();
 
     void on_bt_fire_clicked();
+
+    void onUnitHurt(int damage);
 
 private:
 

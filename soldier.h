@@ -41,12 +41,14 @@ struct SoldierDef
  */
 class Soldier : public Actor
 {
+    Q_OBJECT
 public:
     Soldier(Side side, int life, double size, b2Body *body);
 
     int getLife() const;
     double getPower() const;
     void setLife(int value);
+    void takeDamage(int damage);
     void setPower(double value);
     b2Body *getBody() const;
     qreal getRadius() const;
@@ -59,9 +61,20 @@ public:
      */
     void jump(const b2Vec2 &strength);
 
+    /**
+     * @brief setoff
+     * manually called to make explosion and kill the soldier
+     */
+    void setoff();
+
     // member variables:
 
     const Side m_side;
+
+signals:
+    void died();    // emit when life == 0
+    void hurt(int damage);
+    void triggered();   // emit when setoff is called
 
 private:
     /**

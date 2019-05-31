@@ -32,7 +32,7 @@ void Weapon::fire()
 void Weapon::setoff()
 {
     if (m_state != e_LAUNCHED) return;
-    qDebug() << "Weapon::setoff()";
+//    qDebug() << "Weapon::setoff()";
     trigger();
     emit triggered(); // the destruction of the weapon should be handled by system
 }
@@ -45,7 +45,7 @@ Bazooka::Bazooka(b2Body *body) : ContactWeapon(body)
     b2PolygonShape shape;
     static b2Vec2 tri[3] = {b2Vec2(-0.3, -0.5), b2Vec2(0.3, -0.5), b2Vec2(0, 0.8)};
     shape.Set(tri, 3);
-    body->CreateFixture(&shape, 8.0);
+    body->CreateFixture(&shape, GameConsts::bazooka_density);
 
     m_shape = fromB2Polygon(shape);
     m_bbox = m_shape.boundingRect();
@@ -69,18 +69,8 @@ void Bazooka::launch()  // fire cannon
 
 void Bazooka::trigger() // called when cannon hits something
 {
-    if (m_state != e_LAUNCHED) return;
+    if (m_state != e_LAUNCHED) return;  // trigger only once
     m_state = e_TRIGGERED;
     // make an explosion
-    qDebug("boom!");
-
-    auto center = m_body->GetPosition();
-    static auto rad = 5;
-    auto callback = new Explosion(m_body, center, rad, 60);
-    b2AABB aabb;
-    aabb.lowerBound = center - b2Vec2(rad, rad);
-    aabb.upperBound = center + b2Vec2(rad, rad);
-    m_world->QueryAABB(callback, aabb);
-
-    delete callback;
+    Explosion::create(m_body, 8, 50);
 }
