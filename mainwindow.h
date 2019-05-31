@@ -33,6 +33,8 @@ private slots:
 
     void onUnitHurt(int damage);
 
+    void onGameOver(Side winner);
+
 private:
 
     Ui::MainWindow *ui;

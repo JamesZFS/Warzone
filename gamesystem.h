@@ -52,6 +52,7 @@ signals:
     void requireOperation(Side side);
     void playerChanged(Side side);
     void beginSimulating();
+    void gameOver(Side winner);
 
 protected:
     void resetWorld();
@@ -59,6 +60,8 @@ protected:
     void createLand();
     void createSoldier(const SoldierDef &unit_def);
     void setoffSoldier(Soldier *unit);
+    Side checkWhoWins();  // if either side runs out of soldiers, then the other side wins
+    void setGameOver(Side winner);
 
 protected slots:
     void advanceScene();

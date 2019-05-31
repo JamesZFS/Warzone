@@ -170,6 +170,21 @@ void GameSystem::setoffSoldier(Soldier *unit)
     unit->setoff();
 }
 
+Side GameSystem::checkWhoWins()
+{
+    if (m_R_units.isEmpty())
+        return m_B_units.isEmpty() ? e_TIE : e_BLACK;  // tie or black wins
+    else
+        return m_B_units.isEmpty() ? e_RED : e_NONE;    // red wins or game continues
+}
+
+void GameSystem::setGameOver(Side winner)
+{
+    qDebug() << "\n==GAME OVER==\n";
+    m_game_state = e_COMMON;
+    emit gameOver(winner);
+}
+
 void GameSystem::advanceScene()
 {
     Q_ASSERT(m_scene);
@@ -185,6 +200,13 @@ void GameSystem::waitForOperation()
 void GameSystem::switchPlayer()
 {
     Q_ASSERT(m_game_state == e_OPERATIONAL);
+    Side ret = checkWhoWins();
+    if (ret != e_NONE) {
+        // either side wins or tie
+        setGameOver(ret);
+        return;
+    }
+    // game continuing...
     switch (m_cur_player) {
     case e_RED:
         m_cur_player = e_BLACK;

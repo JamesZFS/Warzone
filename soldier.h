@@ -9,7 +9,7 @@ class GameSystem;
 
 enum Side
 {
-    e_RED, e_BLACK, e_NONE
+    e_RED, e_BLACK, e_NONE, e_TIE
 };
 
 struct SoldierDef
