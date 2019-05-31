@@ -34,7 +34,7 @@ b2Body *Soldier::getBody() const
 
 void Soldier::jump(const b2Vec2 &strength)
 {
-    m_body->ApplyLinearImpulse(10 * strength, m_body->GetWorldCenter(), true);
+    m_body->ApplyLinearImpulse(30 * strength, m_body->GetWorldCenter(), true);
 }
 
 void Soldier::setoff()

@@ -47,7 +47,10 @@ void ChargingFrontSight::paint(QPainter *painter, const QStyleOptionGraphicsItem
     p << QPointF(0, 3) << QPointF(0, -3)
       << QPointF(30 * m_charge, -7 * m_charge - 3)
       << QPointF(30 * m_charge, 7 * m_charge + 3);
-    painter->setBrush(Qt::yellow);
+    static QLinearGradient g(0, -10, 30, 20);
+    g.setColorAt(0.0, QColor(230, 230, 10));
+    g.setColorAt(1.0, QColor(240, 10, 10));
+    painter->setBrush(g);
     painter->drawPolygon(p);
 }
 

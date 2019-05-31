@@ -185,8 +185,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Enter:
     {
         destroyFS();
-        auto angle = qDegreesToRadians(m_aim_angle);
-        m_gamesystem->moveCurUnit(2 * b2Vec2(cos(angle), sin(angle)));
+        m_charge = 0.2;
+        keepDoing(&MainWindow::charge);
         break;
     }
 
@@ -238,6 +238,17 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         destroyFS();
         auto angle = qDegreesToRadians(m_aim_angle);
         m_gamesystem->fireCurUnit(m_weapon_type, m_charge * b2Vec2(cos(angle), sin(angle)));
+        break;
+    }
+
+    // jump
+    case Qt::Key_J:
+    case Qt::Key_Return:
+    case Qt::Key_Enter:
+    {
+        m_timer.stop();
+        auto angle = qDegreesToRadians(m_aim_angle);
+        m_gamesystem->moveCurUnit(m_charge * b2Vec2(cos(angle), sin(angle)));
         break;
     }
 
