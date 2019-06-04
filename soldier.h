@@ -6,6 +6,7 @@
 #include <Box2D/Box2D.h>
 
 class GameSystem;
+class ExplosionEffect;
 
 enum Side
 {
@@ -62,6 +63,7 @@ public:
     qreal getSize() const;
     inline bool isCurrent() const { return m_state != e_COMMON; }
     void setCurrent(bool flag);
+    ExplosionEffect *createExplosionEffect();
 
     /**
      * @brief move

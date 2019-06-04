@@ -56,6 +56,25 @@ class BazookaExplosionEffect : public ExplosionEffect
 public:
     BazookaExplosionEffect(qreal radius);
 
+    // ExplosionEffect interface
+protected:
+    void _paint(QPainter *painter, qreal rad, int alpha) override;
+};
+
+class GrenadeExplosionEffect : public ExplosionEffect
+{
+public:
+    GrenadeExplosionEffect(qreal radius);
+
+    // ExplosionEffect interface
+protected:
+    void _paint(QPainter *painter, qreal rad, int alpha) override;
+};
+
+class SoldierExplosionEffect : public ExplosionEffect
+{
+public:
+    SoldierExplosionEffect(qreal radius);
 
     // ExplosionEffect interface
 protected:

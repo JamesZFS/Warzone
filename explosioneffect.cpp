@@ -56,24 +56,44 @@ void ExplosionEffect::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
         alpha = 255 * 2 * (1.5 - t());
     }
     _paint(painter, rad, alpha);
-//    QRadialGradient g(QPointF(), rad);
-//    g.setSpread(QGradient::ReflectSpread);
-//    g.setColorAt(0, QColor(255, 255, 255, alpha));
-//    g.setColorAt(0.7, QColor(240, 230, 150, alpha));
-//    g.setColorAt(1.0, QColor(250, 200, 50, alpha));
-//    painter->setPen(QPen(Qt::red, 2));
-//    painter->setBrush(g);
-//    painter->drawEllipse(QPointF(), rad, rad);
 }
 
 BazookaExplosionEffect::BazookaExplosionEffect(qreal radius) :
     ExplosionEffect(radius, 250)
 {
-
 }
 
 void BazookaExplosionEffect::_paint(QPainter *painter, qreal rad, int alpha)
 {
     static QPixmap img(":/img/explosion2.png");
     painter->drawPixmap(-rad, -rad, 2 * rad, 2 * rad, getTransparentPixmap(img, alpha));
+}
+
+GrenadeExplosionEffect::GrenadeExplosionEffect(qreal radius) :
+    ExplosionEffect(radius, 250)
+{
+}
+
+void GrenadeExplosionEffect::_paint(QPainter *painter, qreal rad, int alpha)
+{
+    static QPixmap img(":/img/explosion1.png");
+    painter->drawPixmap(-rad, -rad, 2 * rad, 2 * rad, getTransparentPixmap(img, alpha));
+}
+
+SoldierExplosionEffect::SoldierExplosionEffect(qreal radius) :
+    ExplosionEffect(radius, 200)
+{
+
+}
+
+void SoldierExplosionEffect::_paint(QPainter *painter, qreal rad, int alpha)
+{
+    static QRadialGradient g(QPointF(), rad);
+    g.setSpread(QGradient::ReflectSpread);
+    g.setColorAt(0, QColor(255, 255, 255, alpha));
+    g.setColorAt(0.7, QColor(240, 230, 150, alpha));
+    g.setColorAt(1.0, QColor(250, 200, 50, alpha));
+    painter->setPen(QPen(Qt::red, 2));
+    painter->setBrush(g);
+    painter->drawEllipse(QPointF(), rad, rad);
 }

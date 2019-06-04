@@ -24,6 +24,8 @@ signals:
 
 public slots:
     void doSimulation();    // entrance
+    void enableAlways();     // keep simulation even if world is not changing
+    void disableAlways();     // return to normal
 
 private slots:
     void stepWorld();
@@ -37,6 +39,7 @@ private:
     quint32 m_n_iter;
     quint32 m_n_static_iter;
     QStack<Actor*> m_trash; // will release these bodies after simulation
+    bool m_always_flag; // whether to keep simulation even if world is not changing
 };
 
 #endif // ENGINE_H

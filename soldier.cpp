@@ -1,5 +1,6 @@
 #include "soldier.h"
 #include "explosioncallback.h"
+#include "explosioneffect.h"
 #include <QPainter>
 
 Soldier::Soldier(Side side, int life, qreal size, b2Body *body) :
@@ -56,6 +57,14 @@ qreal Soldier::getSize() const
 void Soldier::setCurrent(bool flag)
 {
     m_state = flag ? e_CURRENT_FIRST : e_COMMON;
+}
+
+ExplosionEffect *Soldier::createExplosionEffect()
+{
+    auto effect = new SoldierExplosionEffect(30 * m_size);
+    effect->setPos(pos());
+    effect->startAnimation();
+    return effect;
 }
 
 void Soldier::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)

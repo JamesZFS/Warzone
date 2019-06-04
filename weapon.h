@@ -5,7 +5,10 @@
 
 #include <Box2D/Box2D.h>
 
+#include <QTimer>
+
 class ExplosionEffect;
+class Engine;
 
 class Weapon : public Actor
 {
@@ -29,8 +32,11 @@ public:
     void aim(const b2Vec2 &dir)
     { m_dir = dir; }
 
+public slots:
     void launch();
     void trigger();
+
+public:
     ExplosionEffect *createExplosionEffect();
 
 protected:
@@ -48,7 +54,8 @@ signals:
 
 };
 
-class ContactWeapon : public Weapon // will trigger when hit something
+// will trigger when hit something, implemented mainly by contactlistener
+class ContactWeapon : public Weapon
 {
     Q_OBJECT
 public:
@@ -56,12 +63,16 @@ public:
     virtual qreal threasholdV() const = 0;
 };
 
-class TimingWeapon : public Weapon
+class TimingWeapon : public Weapon  // will trigger after certain time
 {
     Q_OBJECT
 public:
-    TimingWeapon(b2Body *body, float32 power_ratio) : Weapon(body, power_ratio) {}
-    virtual qreal threasholdT() const = 0;
+    TimingWeapon(b2Body *body, float32 power_ratio, Engine *proxy_engine);
+    virtual qreal threasholdT() const = 0;  // trigger time limit, in sec
+    void startTiming();
+
+private:
+    QTimer m_timer;
 };
 
 class Bazooka : public ContactWeapon
@@ -75,7 +86,7 @@ public:
 
     // ContactWeapon interface
     qreal threasholdV() const override
-    { return 0.01; }
+    { return 0.1; }
 
     // Weapon interface
 protected:
@@ -86,6 +97,29 @@ protected:
 private:
     QPolygonF m_shape;
 
+};
+
+class Grenade : public TimingWeapon
+{
+public:
+    Grenade(b2Body *body, float32 power_ratio, qreal duration, Engine *proxy_engine); // duration: in sec
+
+    // QGraphicsItem interface
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
+    // Weapon interface
+protected:
+    void _launch() override;
+    void _trigger() override;
+    ExplosionEffect *_createExplosionEffect() override;
+
+    // TimingWeapon interface
+public:
+    qreal threasholdT() const override
+    { return m_duration; }
+
+private:
+    const qreal m_duration;
 };
 
 #endif // WEAPON_H

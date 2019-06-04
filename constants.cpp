@@ -13,6 +13,7 @@ namespace GameConsts {
 
 const float soldier_density = 1.05;
 const float bazooka_density = 8.0;
+const float grenade_density = 3.0;
 const int max_n_unit = 5;
 const float gravity_constant = 10.0;
 const quint32 max_n_static_iter = 2;

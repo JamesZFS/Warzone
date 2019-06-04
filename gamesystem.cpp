@@ -265,13 +265,15 @@ void GameSystem::moveCurUnit(const b2Vec2 &strength)
     simulateThen(&GameSystem::waitForOperation);
 }
 
+// remove weapon from scene and make explosion effect
 void GameSystem::destroyWeapon()
 {
     auto weapon = qobject_cast<Weapon*>(sender());
     Q_ASSERT(weapon);
     m_scene->removeItem(weapon);
     m_proxy_engine->discard(weapon);
-    auto effect = weapon->createExplosionEffect();
+    // make explosion animation
+    auto effect = weapon->createExplosionEffect();  // a polymorphism method
     connect(effect, &ExplosionEffect::animationFinished, this, [this, effect](){
         m_scene->removeItem(effect);
         delete effect;
@@ -305,6 +307,16 @@ void GameSystem::destroySoldier()
     default:
         qFatal("invalid unit side!");
     }
+    // make explosion effect
+    auto effect = unit->createExplosionEffect();
+    connect(effect, &ExplosionEffect::animationFinished, this, [this, effect](){
+        m_scene->removeItem(effect);
+        delete effect;
+    });
+    m_scene->addItem(effect);
+    advanceScene();
+
+    // remove soldier
     m_scene->removeItem(unit);
     m_proxy_engine->discard(unit);  // safe delete
 }
@@ -316,7 +328,7 @@ void GameSystem::onSimulationFinished(quint32 n_iter)
     // deal with dead units
     if (m_kill_list.isEmpty()) {
         m_game_state = e_OPERATIONAL;
-        (this->*m_after_simulation)();
+        (this->*m_after_simulation)();  // call next method
     }
     else {  // execute one unit per simulation
         Soldier *exec_unit = *m_kill_list.begin();
@@ -355,13 +367,16 @@ void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
     b2BodyDef def;
     b2Vec2 dir = strength / strength.Length();
     def.position = m_cur_unit->getBody()->GetPosition();
-    def.position += dir * m_cur_unit->getSize() * 3;    // ** offset a little
+    def.position += dir * m_cur_unit->getSize() * 1.5;    // ** offset a little
     def.angle = -qAtan2(dir.x, dir.y);   // initial angle, counter-clock-wise +
 
     auto weapon_body = m_world->CreateBody(&def);
     switch (weapon) {
     case Weapon::e_BAZOOKA:
         m_cur_weapon = new Bazooka(weapon_body, m_cur_unit->getPower());
+        break;
+    case Weapon::e_GRENADE:
+        m_cur_weapon = new Grenade(weapon_body, m_cur_unit->getPower(), 3, m_proxy_engine);
         break;
     default:
         qFatal("Weapon not implemented!");

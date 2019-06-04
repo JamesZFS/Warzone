@@ -20,6 +20,7 @@ namespace GameConsts {
 
 extern const float soldier_density;
 extern const float bazooka_density;
+extern const float grenade_density;
 extern const int max_n_unit;
 extern const float gravity_constant;
 extern const quint32 max_n_static_iter;

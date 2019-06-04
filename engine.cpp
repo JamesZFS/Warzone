@@ -5,7 +5,7 @@
 #include <QTimer>
 
 Engine::Engine(QObject *parent, b2World *world) :
-    QObject(parent), m_world(world), m_timer(new QTimer)
+    QObject(parent), m_world(world), m_timer(new QTimer), m_always_flag(false)
 {
     Q_ASSERT(world);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(stepWorld()));
@@ -27,6 +27,16 @@ void Engine::doSimulation()
     m_timer->start(LiquidFun::time_step * 1000.0);
 }
 
+void Engine::enableAlways()
+{
+    m_always_flag = true;
+}
+
+void Engine::disableAlways()
+{
+    m_always_flag = false;
+}
+
 void Engine::stepWorld()
 {
     dumpTrash();
@@ -44,6 +54,7 @@ void Engine::stepWorld()
 
 bool Engine::worldIsChanging()
 {
+    if (m_always_flag) return true;
     for (b2Body *body = m_world->GetBodyList(); body; body = body->GetNext()) {
         if (body->GetType() == b2_staticBody ||
                 !body->IsActive() ||

@@ -75,7 +75,8 @@ void MainWindow::onWaitingOperation(Side side)
     qDebug() << msg;
     ui->bt_move->setEnabled(true);
     ui->bt_fire->setEnabled(true);
-    m_weapon_type = Weapon::e_BAZOOKA;
+//    m_weapon_type = Weapon::e_BAZOOKA;
+    m_weapon_type = Weapon::e_GRENADE;
     m_pressed_key = 0;
     Q_ASSERT(!m_fs);
     m_fs = new FrontSight;
