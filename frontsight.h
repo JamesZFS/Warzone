@@ -5,8 +5,6 @@
 #include <QPropertyAnimation>
 
 
-class QPropertyAnimation;
-
 class FrontSight : public QGraphicsItem
 {
 public:
@@ -14,7 +12,6 @@ public:
 
 protected:
     QRectF m_bbox;
-    const QPointF m_center;
 
     // QGraphicsItem interface
 public:

@@ -1,5 +1,5 @@
 #include "soldier.h"
-#include "explosion.h"
+#include "explosioncallback.h"
 #include <QPainter>
 
 Soldier::Soldier(Side side, int life, qreal size, b2Body *body) :
@@ -39,7 +39,7 @@ void Soldier::jump(const b2Vec2 &strength)
 
 void Soldier::setoff()
 {
-    Explosion::create(m_body, 3 * m_power, 30 * m_power);
+    ExplosionCallback::create(m_body, 3 * m_power, 30 * m_power);
     emit triggered();
 }
 

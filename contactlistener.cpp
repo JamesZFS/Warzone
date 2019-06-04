@@ -19,6 +19,6 @@ void ContactListener::BeginContact(b2Contact *contact)
     Q_ASSERT(weapon_A != weapon_B);
 
     qreal v_approach = (body_A->GetLinearVelocity() - body_B->GetLinearVelocity()).Length();
-    if (weapon_A && v_approach >= weapon_A->threasholdV()) weapon_A->setoff();
-    if (weapon_B && v_approach >= weapon_B->threasholdV()) weapon_B->setoff();
+    if (weapon_A && v_approach >= weapon_A->threasholdV()) weapon_A->trigger();
+    if (weapon_B && v_approach >= weapon_B->threasholdV()) weapon_B->trigger();
 }

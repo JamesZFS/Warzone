@@ -1,6 +1,8 @@
 #include "gamesystem.h"
 #include "engine.h"
 #include "contactlistener.h"
+#include "explosioneffect.h"
+
 #include <QGraphicsScene>
 #include <QtMath>
 
@@ -194,7 +196,7 @@ void GameSystem::setGameOver(Side winner)
 
 void GameSystem::advanceScene()
 {
-    Q_ASSERT(m_scene);
+//    Q_ASSERT(m_scene);
     m_scene->advance();
 }
 
@@ -265,15 +267,17 @@ void GameSystem::moveCurUnit(const b2Vec2 &strength)
 
 void GameSystem::destroyWeapon()
 {
-//    if (!m_cur_weapon) return;
-//    m_scene->removeItem(m_cur_weapon);
-//    m_proxy_engine->discard(m_cur_weapon);
-//    qDebug("weapon destroyed");
-    m_cur_weapon = nullptr;
     auto weapon = qobject_cast<Weapon*>(sender());
     Q_ASSERT(weapon);
     m_scene->removeItem(weapon);
     m_proxy_engine->discard(weapon);
+    auto effect = weapon->createExplosionEffect();
+    connect(effect, &ExplosionEffect::animationFinished, this, [this, effect](){
+        m_scene->removeItem(effect);
+        delete effect;
+    });
+    m_scene->addItem(effect);
+    advanceScene();
 }
 
 void GameSystem::destroySoldier()
@@ -345,7 +349,6 @@ const Soldier *GameSystem::getCurUnit() const
 void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
 {
     Q_ASSERT(m_game_state == e_OPERATIONAL);
-    Q_ASSERT(!m_cur_weapon);
     m_cur_unit->setCurrent(false);
     emit setLCDNumber(0);
 
@@ -369,7 +372,7 @@ void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
     connect(m_cur_weapon, SIGNAL(triggered()), this, SLOT(destroyWeapon()));
 
     m_cur_weapon->aim(strength);
-    m_cur_weapon->fire();
+    m_cur_weapon->launch();
 
     simulateThen(&GameSystem::switchPlayer);
 }

@@ -34,8 +34,9 @@ SOURCES += \
     actor.cpp \
     weapon.cpp \
     contactlistener.cpp \
-    explosion.cpp \
-    frontsight.cpp
+    frontsight.cpp \
+    explosioncallback.cpp \
+    explosioneffect.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -48,8 +49,9 @@ HEADERS += \
     actor.h \
     weapon.h \
     contactlistener.h \
-    explosion.h \
-    frontsight.h
+    frontsight.h \
+    explosioneffect.h \
+    explosioncallback.h
 
 FORMS += \
         mainwindow.ui
@@ -59,3 +61,6 @@ INCLUDEPATH += \
 
 LIBS += \
     /Users/james/Test/liquidfun-master/liquidfun/Box2D/Box2D/Debug/libliquidfun.a
+
+RESOURCES += \
+    res.qrc

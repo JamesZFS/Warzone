@@ -1,14 +1,16 @@
-#ifndef EXPLOSION_H
-#define EXPLOSION_H
+#ifndef EXPLOSIONCALLBACL_H
+#define EXPLOSIONCALLBACL_H
 
 #include <Box2D/Box2D.h>
+#include <QGraphicsObject>
+#include <QPropertyAnimation>
 
 // this is an internal class
-class Explosion : public b2QueryCallback
+class ExplosionCallback : public b2QueryCallback
 {
 protected:
-    Explosion(const b2Body *self, const b2Vec2 &center, float32 rad, float32 power);
-    ~Explosion() = default;
+    ExplosionCallback(const b2Body *self, const b2Vec2 &center, float32 rad, float32 power);
+    ~ExplosionCallback() = default;
 
 public:
     // b2QueryCallback interface
@@ -24,5 +26,4 @@ private:
     const float32 m_power;  // max damage
 };
 
-
-#endif // EXPLOSION_H
+#endif // EXPLOSIONCALLBACL_H

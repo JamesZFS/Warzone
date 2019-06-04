@@ -2,7 +2,10 @@
 #define WEAPON_H
 
 #include "actor.h"
+
 #include <Box2D/Box2D.h>
+
+class ExplosionEffect;
 
 class Weapon : public Actor
 {
@@ -26,12 +29,14 @@ public:
     void aim(const b2Vec2 &dir)
     { m_dir = dir; }
 
-    void fire();
-    void setoff();
+    void launch();
+    void trigger();
+    ExplosionEffect *createExplosionEffect();
 
 protected:
-    virtual void launch() = 0;
-    virtual void trigger() = 0;
+    virtual void _launch() = 0;
+    virtual void _trigger() = 0;
+    virtual ExplosionEffect* _createExplosionEffect() = 0;
 
     State m_state;
     b2Vec2 m_dir;   // both direction and strength is stored
@@ -72,10 +77,11 @@ public:
     qreal threasholdV() const override
     { return 0.01; }
 
-protected:
     // Weapon interface
-    void launch() override;
-    void trigger() override;
+protected:
+    void _launch() override;
+    void _trigger() override;
+    ExplosionEffect *_createExplosionEffect() override;
 
 private:
     QPolygonF m_shape;

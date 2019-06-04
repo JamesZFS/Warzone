@@ -18,9 +18,7 @@ void Actor::setB2Pos(const b2Vec2 &b_pos)
 
 void Actor::setB2Angle(const float32 angle)
 {
-//    qDebug() << "setB2Angle, angle = " << qRadiansToDegrees(angle);
     setRotation(qRadiansToDegrees(angle));   // notice liquidfun uses rad angle
-//    setRotation(45);
 }
 
 QPointF Actor::mapB2Pos(const b2Vec2 &b_pos) const   // zoom x10

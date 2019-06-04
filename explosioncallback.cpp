@@ -1,14 +1,14 @@
-#include "explosion.h"
+#include "explosioncallback.h"
 #include "defs.h"
 #include "soldier.h"
 
 
-Explosion::Explosion(const b2Body *self, const b2Vec2 &center, float32 rad, float32 power) :
+ExplosionCallback::ExplosionCallback(const b2Body *self, const b2Vec2 &center, float32 rad, float32 power) :
     m_self(self), m_center(center), m_rad(rad), m_power(power)
 {
 }
 
-bool Explosion::ReportFixture(b2Fixture *fixture)
+bool ExplosionCallback::ReportFixture(b2Fixture *fixture)
 {
     auto body = fixture->GetBody();
     if (body == m_self || body->GetType() != b2_dynamicBody)
@@ -34,10 +34,10 @@ bool Explosion::ReportFixture(b2Fixture *fixture)
     return true;
 }
 
-void Explosion::create(b2Body *self, float32 rad, float32 power)
+void ExplosionCallback::create(b2Body *self, float32 rad, float32 power)
 {
     auto center = self->GetPosition();
-    Explosion callback(self, center, rad, power);
+    ExplosionCallback callback(self, center, rad, power);
     b2AABB aabb;
     aabb.lowerBound = center - b2Vec2(rad, rad);
     aabb.upperBound = center + b2Vec2(rad, rad);

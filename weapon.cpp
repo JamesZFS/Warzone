@@ -1,6 +1,8 @@
 #include "weapon.h"
 #include "defs.h"
-#include "explosion.h"
+#include "explosioneffect.h"
+#include "explosioncallback.h"
+
 #include <QPainter>
 
 
@@ -23,19 +25,27 @@ bool Weapon::isTriggered() const
     return m_state == e_TRIGGERED;
 }
 
-void Weapon::fire()
+void Weapon::launch()
 {
     if (m_state != e_COMMON) return;
-    launch();
+    _launch();
     emit launched();
 }
 
-void Weapon::setoff()
+void Weapon::trigger()
 {
     if (m_state != e_LAUNCHED) return;
 //    qDebug() << "Weapon::setoff()";
-    trigger();
+    _trigger();
     emit triggered(); // the destruction of the weapon should be handled by system
+}
+
+ExplosionEffect *Weapon::createExplosionEffect()
+{
+    auto effect = _createExplosionEffect();
+    effect->setPos(pos());
+    effect->startAnimation();
+    return effect;
 }
 
 Bazooka::Bazooka(b2Body *body, float32 power_ratio) : ContactWeapon(body, power_ratio)
@@ -50,17 +60,39 @@ Bazooka::Bazooka(b2Body *body, float32 power_ratio) : ContactWeapon(body, power_
 
     m_shape = fromB2Polygon(shape);
     m_bbox = m_shape.boundingRect();
-    m_bbox += QMargins(1, 1, 1, 1);
+    m_bbox += QMarginsF(1, 20, 1, 1);
 }
 
 void Bazooka::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
-    painter->setBrush(QColor(220, 190, 50));
-    painter->drawPolygon(m_shape);
+    switch (m_state) {
+    case e_COMMON: {
+        painter->setBrush(QColor(220, 190, 50));
+        painter->drawPolygon(m_shape);
+        break;
+    }
+    case e_LAUNCHED: {
+        painter->setBrush(QColor(220, 190, 50));
+        painter->drawPolygon(m_shape);
+        QLinearGradient g(QPointF(0, 0), QPointF(0, -10));
+        g.setColorAt(0, QColor(220, 0, 0));
+        g.setColorAt(1, QColor(240, 200, 180));
+        painter->setBrush(g);
+        painter->drawEllipse(QPointF(randf(-1.5, 0.5), -5), 1, randf(4, 6));
+        painter->drawEllipse(QPointF(randf(-0.5, 1.5), -5), 1, randf(4, 6));
+        painter->drawEllipse(QPointF(randf(-0.5, 0.5), -7), 1, randf(5, 8));
+        break;
+    }
+    case e_TRIGGERED:
+        painter->setBrush(QColor(50, 0, 10));
+        painter->drawPolygon(m_shape);
+        break;
+    }
+
     // todo switch different states
 }
 
-void Bazooka::launch()  // fire cannon
+void Bazooka::_launch()  // fire cannon
 {
     Q_ASSERT(m_state == e_COMMON);
     m_state = e_LAUNCHED;
@@ -68,10 +100,15 @@ void Bazooka::launch()  // fire cannon
     m_body->SetLinearVelocity(100 * m_dir);
 }
 
-void Bazooka::trigger() // called when cannon hits something
+void Bazooka::_trigger() // called when cannon hits something
 {
     if (m_state != e_LAUNCHED) return;  // trigger only once
     m_state = e_TRIGGERED;
     // make an explosion
-    Explosion::create(m_body, 8 * m_power_ratio, 50 * m_power_ratio);
+    ExplosionCallback::create(m_body, 8 * m_power_ratio, 50 * m_power_ratio);
+}
+
+ExplosionEffect *Bazooka::_createExplosionEffect()
+{
+    return new BazookaExplosionEffect(50 * m_power_ratio);
 }
