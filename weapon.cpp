@@ -134,7 +134,7 @@ Grenade::Grenade(b2Body *body, float32 power_ratio, qreal duration, Engine *prox
     TimingWeapon(body, power_ratio, proxy_engine), m_duration(duration)
 {
     Q_ASSERT(!body->GetFixtureList());
-    body->SetGravityScale(1.0);
+    body->SetGravityScale(2.0);
     // two circle shapes
     b2CircleShape shape;//, head;
     shape.m_radius = 0.5;   // main part

@@ -367,7 +367,7 @@ void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
     b2BodyDef def;
     b2Vec2 dir = strength / strength.Length();
     def.position = m_cur_unit->getBody()->GetPosition();
-    def.position += dir * m_cur_unit->getSize() * 1.5;    // ** offset a little
+    def.position += dir * m_cur_unit->getSize() * 2.5;    // ** offset a little
     def.angle = -qAtan2(dir.x, dir.y);   // initial angle, counter-clock-wise +
 
     auto weapon_body = m_world->CreateBody(&def);

@@ -5,6 +5,7 @@
 #include <Box2D/Box2D.h>
 #include <QGraphicsView>
 #include <QMessageBox>
+#include <QRadioButton>
 #include <QtMath>
 
 
@@ -12,9 +13,18 @@ MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow),
     m_gamesystem(new GameSystem),
-    m_fs(nullptr), m_cfs(nullptr)
+    m_fs(nullptr), m_cfs(nullptr),
+    m_bt_group(this), m_max_weapon_id(2)
 {
     ui->setupUi(this);
+    // button logic
+    m_bt_group.addButton(ui->rbt_bazooka);
+    m_bt_group.addButton(ui->rbt_grenade);
+    m_bt_group.setId(ui->rbt_bazooka, 0);
+    m_bt_group.setId(ui->rbt_grenade, 1);
+    connect(ui->rbt_bazooka, &QRadioButton::clicked, this, [this](){m_weapon_type = Weapon::e_BAZOOKA;});
+    connect(ui->rbt_grenade, &QRadioButton::clicked, this, [this](){m_weapon_type = Weapon::e_GRENADE;});
+
     connect(ui->bt_start, SIGNAL(clicked()), ui->actionstart, SLOT(trigger()));
     connect(ui->actionstart, SIGNAL(triggered(bool)), this, SLOT(onActionstartTriggered()));
 
@@ -53,30 +63,11 @@ void MainWindow::onActionstartTriggered()
     m_gamesystem->start();
 }
 
-void MainWindow::on_bt_move_clicked()
-{
-    if (!m_gamesystem->isOperational()) return;
-//    ui->label->setText("moving...");
-//    m_gamesystem->moveCurUnit(b2Vec2(randf(-1, 1), randf(0, 2)));
-//    m_gamesystem->moveCurUnit(b2Vec2(1, 1));
-}
-
-void MainWindow::on_bt_fire_clicked()
-{
-    if (!m_gamesystem->isOperational()) return;
-    ui->label->setText("firing...");
-    m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(randf(-0.1, 0.1), randf(1, 2)));
-    //    m_gamesystem->fireCurUnit(Weapon::e_BAZOOKA, b2Vec2(1, 1));
-}
-
 void MainWindow::onWaitingOperation(Side side)
 {
     auto msg = QString("listening for %1 operation...").arg(side == e_RED ? "red" : "black");
     qDebug() << msg;
-    ui->bt_move->setEnabled(true);
-    ui->bt_fire->setEnabled(true);
-//    m_weapon_type = Weapon::e_BAZOOKA;
-    m_weapon_type = Weapon::e_GRENADE;
+    setEnableBtGroup(true);
     m_pressed_key = 0;
     Q_ASSERT(!m_fs);
     m_fs = new FrontSight;
@@ -87,8 +78,7 @@ void MainWindow::onWaitingOperation(Side side)
 
 void MainWindow::onSimulating()
 {
-    ui->bt_move->setEnabled(false);
-    ui->bt_fire->setEnabled(false);
+    setEnableBtGroup(false);
 }
 
 void MainWindow::onUnitHurt(int damage)
@@ -103,6 +93,22 @@ void MainWindow::onGameOver(Side winner)
     if (winner == e_TIE) msg += "Tie!";
     else msg += QString("%1 wins!").arg(winner == e_RED ? "Red" : "Black");
     QMessageBox::information(this, "Game Over", msg, QMessageBox::Ok);
+}
+
+void MainWindow::setEnableBtGroup(bool flag)
+{
+    foreach (auto bt, m_bt_group.buttons()) {
+        bt->setEnabled(flag);
+    }
+    if (flag) ui->rbt_bazooka->click();   // default selection
+}
+
+void MainWindow::switchWeapon()
+{
+    int cur_id = m_bt_group.checkedId();
+    Q_ASSERT(cur_id >= 0);
+    cur_id = (cur_id + 1) % m_max_weapon_id;
+    m_bt_group.button(cur_id)->click();
 }
 
 void MainWindow::aimUp()
@@ -210,6 +216,11 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_D:
     case Qt::Key_Right:
         turnRight();
+        break;
+
+    // switch weapon
+    case Qt::Key_Q:
+        switchWeapon();
         break;
 
     default:

@@ -58,7 +58,7 @@
    <property name="geometry">
     <rect>
      <x>910</x>
-     <y>490</y>
+     <y>560</y>
      <width>80</width>
      <height>41</height>
     </rect>
@@ -67,33 +67,7 @@
     <string>Start</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="bt_pause">
-   <property name="geometry">
-    <rect>
-     <x>910</x>
-     <y>560</y>
-     <width>80</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Pause</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="bt_help">
-   <property name="geometry">
-    <rect>
-     <x>910</x>
-     <y>630</y>
-     <width>80</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Help</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="bt_end">
    <property name="geometry">
     <rect>
      <x>910</x>
@@ -103,7 +77,20 @@
     </rect>
    </property>
    <property name="text">
-    <string>End</string>
+    <string>Help</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bt_surrender">
+   <property name="geometry">
+    <rect>
+     <x>910</x>
+     <y>630</y>
+     <width>80</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Surrender</string>
    </property>
   </widget>
   <widget class="QGraphicsView" name="graphics_view">
@@ -116,30 +103,50 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="bt_move">
+  <widget class="QRadioButton" name="rbt_bazooka">
    <property name="geometry">
     <rect>
-     <x>910</x>
-     <y>420</y>
-     <width>80</width>
+     <x>890</x>
+     <y>130</y>
+     <width>121</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
-    <string>Move</string>
+    <string>Bazooka</string>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/img/Bazooka.png</normaloff>:/img/Bazooka.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>40</width>
+     <height>40</height>
+    </size>
    </property>
   </widget>
-  <widget class="QPushButton" name="bt_fire">
+  <widget class="QRadioButton" name="rbt_grenade">
    <property name="geometry">
     <rect>
-     <x>910</x>
-     <y>350</y>
-     <width>80</width>
-     <height>41</height>
+     <x>890</x>
+     <y>170</y>
+     <width>121</width>
+     <height>51</height>
     </rect>
    </property>
    <property name="text">
-    <string>Fire</string>
+    <string>Grenade</string>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/img/W4_Grenade.png</normaloff>:/img/W4_Grenade.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>40</width>
+     <height>40</height>
+    </size>
    </property>
   </widget>
   <action name="actionstart">
@@ -152,6 +159,8 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections/>
 </ui>

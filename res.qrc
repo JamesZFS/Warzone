@@ -2,5 +2,8 @@
     <qresource prefix="/img">
         <file>explosion2.png</file>
         <file>explosion1.png</file>
+        <file>Bazooka.png</file>
+        <file>W4_Dynamite.png</file>
+        <file>W4_Grenade.png</file>
     </qresource>
 </RCC>

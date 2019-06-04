@@ -7,6 +7,7 @@
 #include <QWidget>
 #include <QtEvents>
 #include <QTimer>
+#include <QButtonGroup>
 
 
 class GameSystem;
@@ -28,9 +29,6 @@ public:
 
 private slots:
     void onActionstartTriggered();
-    void on_bt_move_clicked();
-    void on_bt_fire_clicked();
-
     void onWaitingOperation(Side side);
     void onSimulating();
     void onUnitHurt(int damage);
@@ -43,22 +41,29 @@ private slots:
     void charge();
 
 private:
-
     Ui::MainWindow *ui;
     GameSystem *m_gamesystem;   // backend
 
     // game params:
     Weapon::Type m_weapon_type;
     qreal m_aim_angle;
+
+    // views:
     FrontSight *m_fs;
     ChargingFrontSight *m_cfs;
+
+    // inputs:
     int m_pressed_key;
     qreal m_charge;
     QTimer m_timer;
+    QButtonGroup m_bt_group;
+    const int m_max_weapon_id;
 
 protected:
     void keepDoing(FunPtr what);
     void destroyFS();
+    void setEnableBtGroup(bool flag);
+    void switchWeapon();
 
     // QWidget interface
     void keyPressEvent(QKeyEvent *event) override;
