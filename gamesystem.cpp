@@ -352,6 +352,15 @@ const Soldier *GameSystem::getCurUnit() const
     return m_cur_unit;
 }
 
+void GameSystem::skipCurUnit()
+{
+    Q_ASSERT(m_game_state == e_OPERATIONAL);
+    m_cur_unit->setCurrent(false);
+    m_scene->advance();
+    emit setLCDNumber(0);
+    switchPlayer();
+}
+
 void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
 {
     Q_ASSERT(m_game_state == e_OPERATIONAL);

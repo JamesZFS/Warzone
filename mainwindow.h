@@ -35,6 +35,7 @@ private slots:
     void onGameOver(Side winner);
     void onPlayerChanged(Side cur_side);
     void onInitializing(bool flag);
+    void onSkip();
 
     void aimUp();
     void aimDown();

@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->bt_start, SIGNAL(clicked()), ui->actionstart, SLOT(trigger()));
     connect(ui->actionstart, SIGNAL(triggered(bool)), this, SLOT(onActionstartTriggered()));
+    connect(ui->bt_skip, SIGNAL(clicked()), this, SLOT(onSkip()));
 
     // graphics view
     auto &view = *ui->graphics_view;
@@ -75,6 +76,7 @@ void MainWindow::onWaitingOperation(Side side)
     qDebug() << msg;
     ui->bt_start->setEnabled(true);
     ui->bt_surrender->setEnabled(true);
+    ui->bt_skip->setEnabled(true);
     setEnableBtGroup(true);
     m_pressed_key = 0;
     Q_ASSERT(!m_fs);
@@ -88,6 +90,7 @@ void MainWindow::onSimulating()
 {
     ui->bt_start->setEnabled(false);
     ui->bt_surrender->setEnabled(false);
+    ui->bt_skip->setEnabled(false);
     setEnableBtGroup(false);    // lock
 }
 
@@ -116,6 +119,12 @@ void MainWindow::onInitializing(bool flag)
         setWindowTitle(m_game_name + " (initializing...)");
     else
         setWindowTitle(m_game_name);
+}
+
+void MainWindow::onSkip()
+{
+    destroyFS();
+    m_gamesystem->skipCurUnit();
 }
 
 void MainWindow::setEnableBtGroup(bool flag)

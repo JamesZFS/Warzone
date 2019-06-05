@@ -58,7 +58,7 @@
    <property name="geometry">
     <rect>
      <x>910</x>
-     <y>560</y>
+     <y>490</y>
      <width>80</width>
      <height>41</height>
     </rect>
@@ -170,6 +170,19 @@
      <width>40</width>
      <height>40</height>
     </size>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bt_skip">
+   <property name="geometry">
+    <rect>
+     <x>910</x>
+     <y>560</y>
+     <width>80</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Skip</string>
    </property>
   </widget>
   <action name="actionstart">

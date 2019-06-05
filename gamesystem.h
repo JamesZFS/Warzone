@@ -41,6 +41,7 @@ public:
 
     // operations:
     void moveCurUnit(const b2Vec2 &strength);
+    void skipCurUnit();
     void fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength);
 
     // getters:
