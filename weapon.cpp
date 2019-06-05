@@ -82,7 +82,8 @@ void Bazooka::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     case e_LAUNCHED: {
         auto v = m_body->GetLinearVelocity();
         auto angle = b2Atan2(v.y, v.x) - pi_2;
-        m_body->SetTransform(m_body->GetPosition(), angle); // adjust bazooka angle
+        // async adjust bazooka angle
+        s_proxy_engine->requestTransform(new TransformRequest(m_body, m_body->GetPosition(), angle));
         painter->setBrush(QColor(220, 190, 50));
         painter->drawPolygon(m_shape);
         // draw tail

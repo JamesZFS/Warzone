@@ -87,12 +87,10 @@ private:
      * the greater power, the more clumsy a soldier is (larger mass)
      */
     qreal m_power;
-
     const qreal m_size;  // real size
-
     const qreal m_radius; // radius on the screen
-
     State m_state;
+    QRectF m_bbox_org;
 
 protected:
     virtual const QColor getColor() = 0;

@@ -23,8 +23,9 @@ Soldier::Soldier(Side side, int life, qreal size, b2Body *body) :
     fix_def.restitution = 0.2;
     m_body->CreateFixture(&fix_def);
 
-    m_bbox = QRectF(-m_radius - 2, -m_radius - 2, 2 * (m_radius + 2), 2 * (m_radius + 2));
-    m_bbox = m_bbox.united(QRectF(-11, 32, 22, 30));
+    m_bbox = QRectF(-m_radius, -m_radius, 2*m_radius, 2*m_radius);
+    m_bbox += QMargins(1, 1, 1, 1);
+    m_bbox_org = m_bbox;    // backup
 }
 
 b2Body *Soldier::getBody() const
@@ -71,15 +72,18 @@ void Soldier::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     if (isCurrent()) {
         if (m_state == e_CURRENT_FIRST) {
             QPolygonF tri;
-            tri << QPointF(-6, 30) << QPointF(6, 30) << QPointF(0, 20);
+            tri << QPointF(-8, 40) << QPointF(8, 40) << QPointF(0, 25);
             painter->setBrush(Qt::yellow);
             painter->drawPolygon(tri);
             m_state = e_CURRENT;
         }
         painter->setPen(QPen(Qt::yellow, 2));
+        m_bbox = m_bbox_org.united(QRectF(-20, 0, 40, 50));
     }
-    else
+    else {
         painter->setPen(Qt::NoPen);
+        m_bbox = m_bbox_org.united(QRectF(-12, 0, 24, 40));
+    }
     painter->setBrush(getColor());
     painter->drawEllipse(-m_radius, -m_radius, 2.0 * m_radius, 2.0 * m_radius);
     if (isCurrent()) return;

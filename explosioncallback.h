@@ -5,6 +5,8 @@
 #include <QGraphicsObject>
 #include <QPropertyAnimation>
 
+class Engine;
+
 // this is an internal class
 class ExplosionCallback : public b2QueryCallback
 {

@@ -1,12 +1,14 @@
 #include "explosioncallback.h"
 #include "defs.h"
 #include "soldier.h"
+#include "engine.h"
 
 
 ExplosionCallback::ExplosionCallback(const b2Body *self, const b2Vec2 &center, float32 rad, float32 power) :
     m_self(self), m_center(center), m_rad(rad), m_power(power)
 {
 }
+
 
 bool ExplosionCallback::ReportFixture(b2Fixture *fixture)
 {
@@ -27,6 +29,7 @@ bool ExplosionCallback::ReportFixture(b2Fixture *fixture)
 
     if (body->GetType() == b2_dynamicBody)     // exert impulse to dynamic bodies
         body->ApplyLinearImpulse(dir * f * 1.8, body->GetPosition(), true);
+//        s_proxy_engine->requestImpulse(new ImpulseRequest(body, dir * f * 1.8));
 
     // do some damage to AnimateActor
     auto *animate = dynamic_cast<AnimateActor*>((Actor*)body->GetUserData());

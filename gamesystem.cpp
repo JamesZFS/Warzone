@@ -11,7 +11,7 @@ GameSystem::GameSystem() :
     QObject(nullptr),
     m_world(nullptr), m_land(nullptr), m_water_system(nullptr),
     m_cur_unit(nullptr), m_cur_weapon(nullptr), m_cur_player(e_NONE),
-    m_game_state(e_COMMON), m_proxy_engine(nullptr),
+    m_game_state(e_COMMON),
     m_contact_listener(new ContactListener),
     m_scene(new QGraphicsScene), m_initializer(nullptr)
 {
@@ -27,7 +27,11 @@ GameSystem::~GameSystem()
 void GameSystem::start()
 {
     emit initializing(true);
-    delete m_proxy_engine;
+    if (s_proxy_engine && s_proxy_engine->isRunning()) {
+        qDebug() << "thread still running, waiting for it";
+        s_proxy_engine->wait();
+    }
+    delete s_proxy_engine;
     m_game_state = e_COMMON;
     resetWorld();
     initWorld();
@@ -38,11 +42,11 @@ void GameSystem::start()
     m_B_iter = m_B_units.constBegin();
     setCurUnit(*m_R_iter);
     m_cur_weapon = nullptr;
-    m_proxy_engine = new Engine(this, m_world);
+    s_proxy_engine = new Engine(this, m_world);
     m_kill_list.clear();
-    disconnect(m_proxy_engine, SIGNAL(requiresUpdate()), 0, 0);
-    connect(m_proxy_engine, SIGNAL(finished(quint32)), this, SLOT(onSimulationFinished(quint32)));
-    simulateThen(&GameSystem::onInitialized);
+    connect(s_proxy_engine, SIGNAL(requiresUpdate()), this, SLOT(advanceScene()), Qt::QueuedConnection);
+    connect(s_proxy_engine, SIGNAL(simulationFinished()), this, SLOT(onSimulationFinished()), Qt::DirectConnection);
+    asyncSimulateThen(&GameSystem::onInitialized);
 }
 
 QGraphicsScene *GameSystem::getScene() const
@@ -50,14 +54,23 @@ QGraphicsScene *GameSystem::getScene() const
     return m_scene;
 }
 
-void GameSystem::simulateThen(FunPtr next)
+void GameSystem::syncSimulateThen(FunPtr next)
 {
     qDebug("Simulating...");
+    m_after_simulation = next;
+    m_game_state = e_SIMULAING;   // lock operation
+    emit beginSimulating();
+    s_proxy_engine->syncSimulate();
+}
+
+void GameSystem::asyncSimulateThen(GameSystem::FunPtr next)
+{
+    qDebug("Skipping...");
     // remake async connection
     m_after_simulation = next;
     m_game_state = e_SIMULAING;   // lock operation
     emit beginSimulating();
-    m_proxy_engine->doSimulation();
+    s_proxy_engine->asyncSimulate();
 }
 
 void GameSystem::resetWorld()
@@ -166,8 +179,7 @@ void GameSystem::advanceScene()
 
 void GameSystem::onInitialized()
 {
-    connect(m_proxy_engine, SIGNAL(requiresUpdate()), this, SLOT(advanceScene()));
-    advanceScene();
+    emit initializing(false);
     waitForOperation();
 }
 
@@ -233,7 +245,7 @@ void GameSystem::moveCurUnit(const b2Vec2 &strength)
     Q_ASSERT(m_game_state == e_OPERATIONAL);
     m_cur_unit->jump(strength);
 
-    simulateThen(&GameSystem::waitForOperation);
+    syncSimulateThen(&GameSystem::waitForOperation);
 }
 
 // remove weapon from scene and make explosion effect
@@ -242,7 +254,7 @@ void GameSystem::destroyWeapon()
     auto weapon = qobject_cast<Weapon*>(sender());
     Q_ASSERT(weapon);
     m_scene->removeItem(weapon);
-    m_proxy_engine->discard(weapon);
+    s_proxy_engine->discard(weapon);
     // make explosion animation
     auto effect = weapon->createExplosionEffect();  // a polymorphism method
     connect(effect, &ExplosionEffect::animationFinished, this, [this, effect](){
@@ -289,12 +301,13 @@ void GameSystem::destroySoldier()
 
     // remove soldier
     m_scene->removeItem(unit);
-    m_proxy_engine->discard(unit);  // safe delete
+    s_proxy_engine->discard(unit);  // safe delete
 }
 
-void GameSystem::onSimulationFinished(quint32 n_iter)
+void GameSystem::onSimulationFinished()
 {
-    qDebug() << QString("simulation finished in %1 iters").arg(n_iter);
+    qDebug() << QString("simulation finished in %1 iters").arg(s_proxy_engine->n_iter());
+    advanceScene();
     m_game_state = e_COMMON;
     // deal with dead units
     if (m_kill_list.isEmpty()) {
@@ -305,7 +318,7 @@ void GameSystem::onSimulationFinished(quint32 n_iter)
         Soldier *exec_unit = *m_kill_list.begin();
         m_kill_list.remove(exec_unit);
         exec_unit->setoff();
-        simulateThen(m_after_simulation);   // keep exploding until no one killed
+        syncSimulateThen(m_after_simulation);   // keep exploding until no one killed
     }
 }
 
@@ -331,7 +344,7 @@ void GameSystem::onBrickDied()
     qDebug("  a brick died");
     if (!m_bricks.remove(brick)) return;    // avoid dumplicative deletion
     m_scene->removeItem(brick);
-    m_proxy_engine->discard(brick);
+    s_proxy_engine->discard(brick);
 }
 
 const Soldier *GameSystem::getCurUnit() const
@@ -357,7 +370,7 @@ void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
         m_cur_weapon = new Bazooka(weapon_body, m_cur_unit->getPower());
         break;
     case Weapon::e_GRENADE:
-        m_cur_weapon = new Grenade(weapon_body, m_cur_unit->getPower(), 3, m_proxy_engine);
+        m_cur_weapon = new Grenade(weapon_body, m_cur_unit->getPower(), 3, s_proxy_engine);
         break;
     default:
         qFatal("Weapon not implemented!");
@@ -370,7 +383,7 @@ void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
     m_cur_weapon->aim(strength);
     m_cur_weapon->launch();
 
-    simulateThen(&GameSystem::switchPlayer);
+    syncSimulateThen(&GameSystem::switchPlayer);
 }
 
 Side GameSystem::getCurPlayer() const

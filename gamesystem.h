@@ -34,8 +34,10 @@ public:
 
     void start();
 
-    // step the system until next key event (when everything is static)
-    void simulateThen(FunPtr next);
+    // step the system (with updation) until next key event (when everything is static)
+    void syncSimulateThen(FunPtr next);
+    // step fast without updation
+    void asyncSimulateThen(FunPtr next);
 
     // operations:
     void moveCurUnit(const b2Vec2 &strength);
@@ -67,9 +69,6 @@ signals:
 protected:
     void resetWorld();
     void initWorld();    // called right after start()
-//    void createLand();
-//    void createBrick(const BrickDef &brick_def);
-//    void createSoldier(const SoldierDef &unit_def);
     void setoffSoldier(Soldier *unit);
     void setCurUnit(Soldier *unit);
     Side checkWhoWins();  // if either side runs out of soldiers, then the other side wins
@@ -82,7 +81,7 @@ protected slots:
     void switchPlayer();  // switch turn to next player with unit automatically selected
     void destroyWeapon();
     void destroySoldier();
-    void onSimulationFinished(quint32 n_iter);  // called right after simulation
+    void onSimulationFinished();  // called right after simulation
     void onSoldierHurt(int damage);
     void onSoldierDied();
     void onBrickDied();
@@ -104,7 +103,6 @@ private:
     QSet<RedSoldier*>::const_iterator m_R_iter;
     QSet<BlackSoldier*>::const_iterator m_B_iter;
     GameState m_game_state;
-    Engine *m_proxy_engine;  // proxy simulator
     ContactListener *m_contact_listener;
 
     // other members:

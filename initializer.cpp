@@ -33,11 +33,11 @@ void FortressInitializer::initLand(Land *&land)
     body->CreateFixture(&shape, 0);
 
     // landscape: (shape like "M")
-    static const b2Vec2 pl[4] = { b2Vec2(-w, -h/2), b2Vec2(-4*w/5, 0), b2Vec2(-2*w/5, 0), b2Vec2(-w/5, -h/2) };
-    static const b2Vec2 pr[4] = { b2Vec2(+w, -h/2), b2Vec2(+4*w/5, 0), b2Vec2(+2*w/5, 0), b2Vec2(+w/5, -h/2) };
-    shape.Set(pl, 4);
+    static const b2Vec2 pl[5] = { b2Vec2(-w, -h/5), b2Vec2(-4*w/5, 0), b2Vec2(-2*w/5, 0), b2Vec2(-w/5, -h/2), b2Vec2(-w, -h/2) };
+    static const b2Vec2 pr[5] = { b2Vec2(+w, -h/5), b2Vec2(+4*w/5, 0), b2Vec2(+2*w/5, 0), b2Vec2(+w/5, -h/2), b2Vec2(+w, -h/2) };
+    shape.Set(pl, 5);
     body->CreateFixture(&shape, 0);
-    shape.Set(pr, 4);
+    shape.Set(pr, 5);
     body->CreateFixture(&shape, 0);
 
     // bottom

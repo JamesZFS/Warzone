@@ -15,7 +15,7 @@ const qreal world_width = 80;
 const qreal world_height = 50;
 
 const int max_n_unit = 5;
-const int max_n_brick = 70;
+const int max_n_brick = 10;
 
 const float soldier_density = 1.05;
 const float brick_density1 = 0.5;

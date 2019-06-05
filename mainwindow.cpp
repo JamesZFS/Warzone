@@ -71,6 +71,8 @@ void MainWindow::onWaitingOperation(Side side)
 {
     auto msg = QString("listening for %1 operation...").arg(side == e_RED ? "red" : "black");
     qDebug() << msg;
+    ui->bt_start->setEnabled(true);
+    ui->bt_surrender->setEnabled(true);
     setEnableBtGroup(true);
     m_pressed_key = 0;
     Q_ASSERT(!m_fs);
@@ -82,6 +84,8 @@ void MainWindow::onWaitingOperation(Side side)
 
 void MainWindow::onSimulating()
 {
+    ui->bt_start->setEnabled(false);
+    ui->bt_surrender->setEnabled(false);
     setEnableBtGroup(false);    // lock
 }
 
@@ -183,7 +187,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         event->ignore();
         return; // listen for the first key
     }
-    qDebug() << "press:" << QKeySequence(event->key());
     m_pressed_key = event->key();
     switch (event->key()) {
 
@@ -251,7 +254,6 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         event->ignore();
         return;
     }
-    qDebug() << "release:" << QKeySequence(event->key());
     m_pressed_key = 0;
     switch (event->key()) {
     // fire
