@@ -49,6 +49,7 @@ Brick *Brick::createTriangle(b2Body *body, qreal size, const QBrush *brush)
     Q_ASSERT(!body->GetFixtureList());
     b2PolygonShape shape;
     const b2Vec2 tri[3] = { b2Vec2(-size/2, 0), b2Vec2(+size/2, 0), b2Vec2(0, sqrt_3_2*size) };
+    shape.Set(tri, 3);
     body->CreateFixture(&shape, density1)->SetFriction(friction);
     return new Brick(body, life1, brush);
 }

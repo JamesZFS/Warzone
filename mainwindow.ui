@@ -149,6 +149,29 @@
     </size>
    </property>
   </widget>
+  <widget class="QRadioButton" name="rbt_shotgun">
+   <property name="geometry">
+    <rect>
+     <x>890</x>
+     <y>220</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Shotgun</string>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/W4_Shotgun.png</normaloff>:/res/W4_Shotgun.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>40</width>
+     <height>40</height>
+    </size>
+   </property>
+  </widget>
   <action name="actionstart">
    <property name="text">
     <string>start</string>

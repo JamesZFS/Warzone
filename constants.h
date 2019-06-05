@@ -30,6 +30,7 @@ extern const float brick_density1;
 extern const float brick_density2;
 extern const float bazooka_density;
 extern const float grenade_density;
+extern const float bullet_density;
 extern const float gravity_constant;
 extern const quint32 max_n_static_iter; // stop simulating after how many non-changing times
 
@@ -39,6 +40,8 @@ extern const int brick_life2;
 extern const float brick_friction;
 extern const float bazooka_velocity;
 extern const float grenade_velocity;
+extern const float bullet_velocity;
+extern const int max_weapon_id;
 
 }
 

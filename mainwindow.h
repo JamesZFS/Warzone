@@ -59,7 +59,6 @@ private:
     qreal m_charge;
     QTimer m_timer;
     QButtonGroup m_bt_group;
-    const int m_max_weapon_id;
     const QString m_game_name;
 
 protected:

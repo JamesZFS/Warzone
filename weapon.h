@@ -37,12 +37,12 @@ public slots:
     void trigger();
 
 public:
-    ExplosionEffect *createExplosionEffect();
+    ExplosionEffect *createExplosionEffect() const;
 
 protected:
     virtual void _launch() = 0;
     virtual void _trigger() = 0;
-    virtual ExplosionEffect* _createExplosionEffect() = 0;
+    virtual ExplosionEffect* _createExplosionEffect() const = 0;
 
     State m_state;
     b2Vec2 m_dir;   // both direction and strength is stored
@@ -92,7 +92,7 @@ public:
 protected:
     void _launch() override;
     void _trigger() override;
-    ExplosionEffect *_createExplosionEffect() override;
+    ExplosionEffect *_createExplosionEffect() const override;
 
 private:
     QPolygonF m_shape;
@@ -111,7 +111,7 @@ public:
 protected:
     void _launch() override;
     void _trigger() override;
-    ExplosionEffect *_createExplosionEffect() override;
+    ExplosionEffect *_createExplosionEffect() const override;
 
     // TimingWeapon interface
 public:
@@ -120,6 +120,30 @@ public:
 
 private:
     const qreal m_duration;
+};
+
+class Shotgun : public ContactWeapon
+{
+public:
+    Shotgun(b2Body *body, float32 power_ratio);
+
+    // QGraphicsItem interface
+public:
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
+    // Weapon interface
+protected:
+    void _launch() override;
+    void _trigger() override;
+    ExplosionEffect *_createExplosionEffect() const override;
+
+    // ContactWeapon interface
+public:
+    qreal threasholdV() const override
+    { return 0.01; }
+
+private:
+    QPolygonF m_shape;
 };
 
 #endif // WEAPON_H

@@ -372,6 +372,9 @@ void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
     case Weapon::e_GRENADE:
         m_cur_weapon = new Grenade(weapon_body, m_cur_unit->getPower(), 3, s_proxy_engine);
         break;
+    case Weapon::e_SHOTGUN:
+        m_cur_weapon = new Shotgun(weapon_body, m_cur_unit->getPower());
+        break;
     default:
         qFatal("Weapon not implemented!");
         break;

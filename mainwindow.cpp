@@ -14,18 +14,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     m_gamesystem(new GameSystem),
     m_fs(nullptr), m_cfs(nullptr),
-    m_bt_group(this), m_max_weapon_id(2),
-    m_game_name("Warzone")
+    m_bt_group(this), m_game_name("Warzone")
 {
     ui->setupUi(this);
     setWindowTitle(m_game_name);
     // button logic
     m_bt_group.addButton(ui->rbt_bazooka);
     m_bt_group.addButton(ui->rbt_grenade);
+    m_bt_group.addButton(ui->rbt_shotgun);
     m_bt_group.setId(ui->rbt_bazooka, 0);
     m_bt_group.setId(ui->rbt_grenade, 1);
+    m_bt_group.setId(ui->rbt_shotgun, 2);
     connect(ui->rbt_bazooka, &QRadioButton::clicked, this, [this](){m_weapon_type = Weapon::e_BAZOOKA;});
     connect(ui->rbt_grenade, &QRadioButton::clicked, this, [this](){m_weapon_type = Weapon::e_GRENADE;});
+    connect(ui->rbt_shotgun, &QRadioButton::clicked, this, [this](){m_weapon_type = Weapon::e_SHOTGUN;});
 
     connect(ui->bt_start, SIGNAL(clicked()), ui->actionstart, SLOT(trigger()));
     connect(ui->actionstart, SIGNAL(triggered(bool)), this, SLOT(onActionstartTriggered()));
@@ -127,7 +129,7 @@ void MainWindow::switchWeapon()
 {
     int cur_id = m_bt_group.checkedId();
     Q_ASSERT(cur_id >= 0);
-    cur_id = (cur_id + 1) % m_max_weapon_id;
+    cur_id = (cur_id + 1) % GameConsts::max_weapon_id;
     m_bt_group.button(cur_id)->click();
 }
 

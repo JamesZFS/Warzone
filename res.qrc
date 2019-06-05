@@ -10,5 +10,6 @@
         <file>res/W4_Dynamite.png</file>
         <file>res/W4_Grenade.png</file>
         <file>res/woodfencetexture.jpeg</file>
+        <file>res/W4_Shotgun.png</file>
     </qresource>
 </RCC>

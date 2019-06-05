@@ -45,7 +45,7 @@ void Weapon::trigger()
     emit triggered(); // the destruction of the weapon should be handled by system
 }
 
-ExplosionEffect *Weapon::createExplosionEffect()
+ExplosionEffect *Weapon::createExplosionEffect() const
 {
     auto effect = _createExplosionEffect();
     effect->setPos(pos());
@@ -67,7 +67,7 @@ Bazooka::Bazooka(b2Body *body, float32 power_ratio) :
     body->CreateFixture(&shape, GameConsts::bazooka_density);
 
     m_shape = fromB2Polygon(shape);
-    m_bbox = m_shape.boundingRect();
+    m_bbox = findBodyBound();
     m_bbox += QMarginsF(1, 20, 1, 1);
 }
 
@@ -116,11 +116,10 @@ void Bazooka::_trigger() // called when cannon hits something
     ExplosionCallback::create(m_body, 8 * m_power_ratio, 50 * m_power_ratio);
 }
 
-ExplosionEffect *Bazooka::_createExplosionEffect()
+ExplosionEffect *Bazooka::_createExplosionEffect() const
 {
     return new BazookaExplosionEffect(50 * m_power_ratio);
 }
-
 
 // TIMING WEAPONS
 
@@ -181,7 +180,44 @@ void Grenade::_trigger()
     ExplosionCallback::create(m_body, 8 * m_power_ratio, 50 * m_power_ratio);
 }
 
-ExplosionEffect *Grenade::_createExplosionEffect()
+ExplosionEffect *Grenade::_createExplosionEffect() const
 {
     return new GrenadeExplosionEffect(50 * m_power_ratio);
+}
+
+Shotgun::Shotgun(b2Body *body, float32 power_ratio) : ContactWeapon(body, power_ratio)
+{
+    Q_ASSERT(!body->GetFixtureList());
+    body->SetGravityScale(1.5);
+    // a triangle shape
+    b2PolygonShape shape;
+    static b2Vec2 tri[3] = {b2Vec2(-0.2, -0.5), b2Vec2(0.2, -0.5), b2Vec2(0, 0.8)};
+    shape.Set(tri, 3);
+    body->CreateFixture(&shape, GameConsts::bullet_density);
+
+    m_shape = fromB2Polygon(shape);
+    m_bbox = findBodyBound();
+    m_bbox += QMarginsF(1, 1, 1, 1);
+}
+
+void Shotgun::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+{
+    painter->setBrush(QColor(220, 130, 50));
+    painter->drawPolygon(m_shape);
+}
+
+void Shotgun::_launch()
+{
+    m_dir.Normalize();
+    m_body->SetLinearVelocity(GameConsts::bullet_velocity * m_dir);
+}
+
+void Shotgun::_trigger()
+{
+    ExplosionCallback::create(m_body, 3 * m_power_ratio, 40 * m_power_ratio);
+}
+
+ExplosionEffect *Shotgun::_createExplosionEffect() const
+{
+    return new SoldierExplosionEffect(20 * m_power_ratio);
 }
