@@ -5,7 +5,7 @@
 #include <QTimer>
 
 Engine::Engine(QObject *parent, b2World *world) :
-    QObject(parent), m_world(world), m_timer(new QTimer), m_always_flag(false)
+    QObject(parent), m_world(world), m_timer(new QTimer), m_always_flag(false), m_busy(false)
 {
     Q_ASSERT(world);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(stepWorld()));
@@ -23,8 +23,25 @@ void Engine::discard(Actor *actor)
 
 void Engine::doSimulation()
 {
+    Q_ASSERT(!m_busy);
     m_n_iter = 0;
+    m_busy = true;
     m_timer->start(LiquidFun::time_step * 1000.0);
+}
+
+void Engine::doSimulationSequential()
+{
+    Q_ASSERT(!m_busy);
+    Q_ASSERT(!m_always_flag);
+    m_n_iter = 0;
+    m_busy = true;
+    while (worldIsChanging() || m_n_iter == 0) {
+        ++m_n_iter;
+        m_world->Step(LiquidFun::time_step,
+                      LiquidFun::n_velocity_iteration,
+                      LiquidFun::n_position_iteration);
+    }
+    onFinished();
 }
 
 void Engine::enableAlways()
@@ -44,14 +61,20 @@ void Engine::setSleep()
     }
 }
 
+void Engine::onFinished()
+{
+    setSleep();
+    m_busy = false;
+    emit finished(m_n_iter);
+    return;
+}
+
 void Engine::stepWorld()
 {
     dumpTrash();
-    if (!worldIsChanging() && m_n_iter) {   // everything is static, stop simulation
+    if (!worldIsChanging() && m_n_iter > 0) {   // everything is static, stop simulation
         m_timer->stop();
-        setSleep();
-        emit finished(m_n_iter);
-        return;
+        onFinished();
     }
     ++m_n_iter;
     m_world->Step(LiquidFun::time_step,
@@ -87,4 +110,9 @@ void Engine::dumpTrash()
         m_world->DestroyBody(actor->body());
         delete actor;
     }
+}
+
+bool Engine::busy() const
+{
+    return m_busy;
 }

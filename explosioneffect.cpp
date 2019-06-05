@@ -65,7 +65,7 @@ BazookaExplosionEffect::BazookaExplosionEffect(qreal radius) :
 
 void BazookaExplosionEffect::_paint(QPainter *painter, qreal rad, int alpha)
 {
-    static QPixmap img(":/img/explosion2.png");
+    static QPixmap img(":/res/explosion2.png");
     painter->drawPixmap(-rad, -rad, 2 * rad, 2 * rad, getTransparentPixmap(img, alpha));
 }
 
@@ -76,7 +76,7 @@ GrenadeExplosionEffect::GrenadeExplosionEffect(qreal radius) :
 
 void GrenadeExplosionEffect::_paint(QPainter *painter, qreal rad, int alpha)
 {
-    static QPixmap img(":/img/explosion1.png");
+    static QPixmap img(":/res/explosion1.png");
     painter->drawPixmap(-rad, -rad, 2 * rad, 2 * rad, getTransparentPixmap(img, alpha));
 }
 

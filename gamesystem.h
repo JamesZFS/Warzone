@@ -13,6 +13,7 @@
 class Engine;
 class QGraphicsScene;
 class ContactListener;
+class Initializer;
 
 class GameSystem : public QObject
 {
@@ -53,6 +54,7 @@ public:
     const Soldier *getCurUnit() const;
 
 signals:
+    void initializing(bool flag);
     void unitKilled(QString msg);
     void unitHurt(int damage);
     void requireOperation(Side side);
@@ -65,10 +67,9 @@ signals:
 protected:
     void resetWorld();
     void initWorld();    // called right after start()
-    void createLand();
-    void createBrick(const BrickDef &brick_def);
-    void createSoldier(const SoldierDef &unit_def);
-    void addBrick(Brick *brick);
+//    void createLand();
+//    void createBrick(const BrickDef &brick_def);
+//    void createSoldier(const SoldierDef &unit_def);
     void setoffSoldier(Soldier *unit);
     void setCurUnit(Soldier *unit);
     Side checkWhoWins();  // if either side runs out of soldiers, then the other side wins
@@ -76,6 +77,7 @@ protected:
 
 protected slots:
     void advanceScene();
+    void onInitialized();
     void waitForOperation();
     void switchPlayer();  // switch turn to next player with unit automatically selected
     void destroyWeapon();
@@ -105,12 +107,11 @@ private:
     Engine *m_proxy_engine;  // proxy simulator
     ContactListener *m_contact_listener;
 
+    // other members:
     QGraphicsScene *m_scene;  // stage
-
+    Initializer *m_initializer;
     FunPtr m_after_simulation;   // call this after simulation
-
     QSet<Soldier*> m_kill_list;   // kill soldiers after simulation
-
     QSet<QGraphicsItem *> m_ext_item;  // user defined items, will not be cleared
 };
 

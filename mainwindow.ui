@@ -117,7 +117,7 @@
    </property>
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/img/Bazooka.png</normaloff>:/img/Bazooka.png</iconset>
+     <normaloff>:/res/Bazooka.png</normaloff>:/res/Bazooka.png</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -140,7 +140,7 @@
    </property>
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/img/W4_Grenade.png</normaloff>:/img/W4_Grenade.png</iconset>
+     <normaloff>:/res/W4_Grenade.png</normaloff>:/res/W4_Grenade.png</iconset>
    </property>
    <property name="iconSize">
     <size>

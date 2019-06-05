@@ -31,17 +31,18 @@ class Brick : public AnimateActor
     Q_OBJECT
 public:
     // body has defined its fixture before calling this
-    Brick(b2Body *body, int life, const QColor &color);
+    Brick(b2Body *body, int life, const QBrush *brush);
 
     // helpful creators: (body already set its type and position)
     // angle is in degrees
-    static Brick *createBlock(b2Body *body, qreal size, const QColor &color = Qt::gray);
-    static Brick *createCircle(b2Body *body, qreal rad, const QColor &color = Qt::gray);
-    static Brick *createTriangle(b2Body *body, qreal size, const QColor &color = Qt::gray);
-    static Brick *createU(b2Body *body, qreal width, qreal height, qreal thickness = 2, const QColor &color = Qt::gray);
+    static Brick *createRect(b2Body *body, qreal w, qreal h, const QBrush *brush = nullptr);
+    static Brick *createBlock(b2Body *body, qreal size, const QBrush *brush = nullptr);
+    static Brick *createCircle(b2Body *body, qreal rad, const QBrush *brush = nullptr);
+    static Brick *createTriangle(b2Body *body, qreal size, const QBrush *brush = nullptr);
+    static Brick *createU(b2Body *body, qreal width, qreal height, qreal thickness = 1, const QBrush *brush = nullptr);
 
 protected:
-    QColor m_color;
+    const QBrush *m_brush;
 
     // QGraphicsItem interface
 public:

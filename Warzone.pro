@@ -37,7 +37,8 @@ SOURCES += \
     frontsight.cpp \
     explosioncallback.cpp \
     explosioneffect.cpp \
-    brick.cpp
+    brick.cpp \
+    initializer.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -53,7 +54,8 @@ HEADERS += \
     frontsight.h \
     explosioneffect.h \
     explosioncallback.h \
-    brick.h
+    brick.h \
+    initializer.h
 
 FORMS += \
         mainwindow.ui

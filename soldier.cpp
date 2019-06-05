@@ -19,7 +19,7 @@ Soldier::Soldier(Side side, int life, qreal size, b2Body *body) :
     b2FixtureDef fix_def;
     fix_def.shape = &shape;
     fix_def.density = GameConsts::soldier_density;
-    fix_def.friction = 0.4;
+    fix_def.friction = 5.0;
     fix_def.restitution = 0.2;
     m_body->CreateFixture(&fix_def);
 

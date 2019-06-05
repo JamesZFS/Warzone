@@ -1,10 +1,14 @@
 <RCC>
-    <qresource prefix="/img">
-        <file>explosion2.png</file>
-        <file>explosion1.png</file>
-        <file>Bazooka.png</file>
-        <file>W4_Dynamite.png</file>
-        <file>W4_Grenade.png</file>
-        <file>grasstexture.jpg</file>
+    <qresource prefix="/">
+        <file>res/woodtexture.jpg</file>
+        <file>res/Bazooka.png</file>
+        <file>res/bricktexture.jpeg</file>
+        <file>res/explosion1.png</file>
+        <file>res/explosion2.png</file>
+        <file>res/grasstexture.jpg</file>
+        <file>res/ironfencetexture.jpg</file>
+        <file>res/W4_Dynamite.png</file>
+        <file>res/W4_Grenade.png</file>
+        <file>res/woodfencetexture.jpeg</file>
     </qresource>
 </RCC>

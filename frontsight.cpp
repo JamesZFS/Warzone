@@ -38,7 +38,7 @@ ChargingFrontSight::ChargingFrontSight() :
     m_bbox = QRectF(0, -10, 30, 20);
     m_anim.setStartValue(0.0);
     m_anim.setEndValue(1.0);
-    m_anim.setDuration(2000);   // 2s
+    m_anim.setDuration(1000);   // 1s
 }
 
 void ChargingFrontSight::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)

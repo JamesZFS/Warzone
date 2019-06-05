@@ -2,6 +2,7 @@
 #include "engine.h"
 #include "contactlistener.h"
 #include "explosioneffect.h"
+#include "initializer.h"
 
 #include <QGraphicsScene>
 #include <QtMath>
@@ -12,7 +13,7 @@ GameSystem::GameSystem() :
     m_cur_unit(nullptr), m_cur_weapon(nullptr), m_cur_player(e_NONE),
     m_game_state(e_COMMON), m_proxy_engine(nullptr),
     m_contact_listener(new ContactListener),
-    m_scene(new QGraphicsScene)
+    m_scene(new QGraphicsScene), m_initializer(nullptr)
 {
 }
 
@@ -25,6 +26,7 @@ GameSystem::~GameSystem()
 
 void GameSystem::start()
 {
+    emit initializing(true);
     delete m_proxy_engine;
     m_game_state = e_COMMON;
     resetWorld();
@@ -38,9 +40,9 @@ void GameSystem::start()
     m_cur_weapon = nullptr;
     m_proxy_engine = new Engine(this, m_world);
     m_kill_list.clear();
-    connect(m_proxy_engine, SIGNAL(requiresUpdate()), this, SLOT(advanceScene()));
+    disconnect(m_proxy_engine, SIGNAL(requiresUpdate()), 0, 0);
     connect(m_proxy_engine, SIGNAL(finished(quint32)), this, SLOT(onSimulationFinished(quint32)));
-    simulateThen(&GameSystem::waitForOperation);
+    simulateThen(&GameSystem::onInitialized);
 }
 
 QGraphicsScene *GameSystem::getScene() const
@@ -63,6 +65,8 @@ void GameSystem::resetWorld()
     // clear world
     delete m_world;
     m_world = nullptr;
+    delete m_initializer;
+    m_initializer = nullptr;
     delete m_land;
     m_land = nullptr;
     m_water_system = nullptr;
@@ -81,45 +85,39 @@ void GameSystem::initWorld()
 {
     // create world
     m_world = new b2World(b2Vec2(0, -GameConsts::gravity_constant));
-
     // link contact listener
+    m_initializer = new FortressInitializer(m_world);
+    // setup initializer
     m_world->SetContactListener(m_contact_listener);
 
     // create land
-    createLand();
+    m_initializer->initLand(m_land);
+    Q_ASSERT(m_land);
+    m_scene->addItem(m_land);
 
-    auto w = GameConsts::world_width, h = GameConsts::world_height;
     // create bricks
-    for (int i = 0; i < GameConsts::max_n_brick; ++i) {
-//        BrickDef def;
-//        def.rand();
-//        def.position.y = 0;
-//        b2PolygonShape shape;
-//        shape.SetAsBox(1, 0.5);
-//        def.shape = &shape;
-//        createBrick(def);
-        b2BodyDef def;
-        def.type = b2_dynamicBody;
-        def.angle = randf(0, b2_pi);
-        def.position.Set(randf(-0.8*w, 0.8*w), 0);
-        auto body = m_world->CreateBody(&def);
-        auto brick = Brick::createU(body, 20, 10);
-        addBrick(brick);
+    m_initializer->initBricks(m_bricks);
+    foreach (auto brick, m_bricks) {
+        connect(brick, SIGNAL(died()), this, SLOT(onBrickDied()));
+        m_bricks << brick;
+        m_scene->addItem(brick);
     }
 
     // todo generate particles
 
     // create R units and B units
-    for (int i = 0; i < GameConsts::max_n_unit; ++i) {
-        SoldierDef def;
-        def.life = 100;
-        def.size = 0.5 + i * 0.2;   // 0.5 - 1.5
-        def.position.Set(randf(-0.8*w, -0.2*w), 2);
-        def.side = e_RED;
-        createSoldier(def);
-        def.side = e_BLACK;
-        def.position.Set(randf(+0.2*w, +0.8*w), 2);
-        createSoldier(def);
+    m_initializer->initUnits(m_R_units, m_B_units);
+    foreach (auto unit, m_R_units) {
+        connect(unit, SIGNAL(hurt(int)), this, SLOT(onSoldierHurt(int)));
+        connect(unit, SIGNAL(died()), this, SLOT(onSoldierDied()));
+        connect(unit, SIGNAL(triggered()), this, SLOT(destroySoldier()));
+        m_scene->addItem(unit);
+    }
+    foreach (auto unit, m_B_units) {
+        connect(unit, SIGNAL(hurt(int)), this, SLOT(onSoldierHurt(int)));
+        connect(unit, SIGNAL(died()), this, SLOT(onSoldierDied()));
+        connect(unit, SIGNAL(triggered()), this, SLOT(destroySoldier()));
+        m_scene->addItem(unit);
     }
 
     LiquidFun::n_particle_iteration =
@@ -129,62 +127,7 @@ void GameSystem::initWorld()
     qDebug() << "ground and units spwaned! game ready.";
 }
 
-void GameSystem::createLand()
-{
-    Q_ASSERT(!m_land);
-    // new land instance
-    b2BodyDef def;
-    def.position.SetZero();
-    auto body = m_world->CreateBody(&def);
-    m_land = Land::create(body, GameConsts::world_width, GameConsts::world_height);
-    m_scene->addItem(m_land);
-}
-
-void GameSystem::createBrick(const BrickDef &brick_def)
-{
-    Q_ASSERT(brick_def.shape);
-    b2BodyDef body_def;
-    body_def.type = brick_def.type;
-    body_def.position = brick_def.position;
-    b2Body *body = m_world->CreateBody(&body_def);
-    body->CreateFixture(brick_def.shape, brick_def.density)->SetFriction(0.2);
-    auto brick = new Brick(body, brick_def.life, brick_def.color);
-    addBrick(brick);
-}
-
-void GameSystem::createSoldier(const SoldierDef &unit_def)
-{
-    b2BodyDef body_def;
-    body_def.position = unit_def.position;
-    body_def.type = b2_dynamicBody;
-    auto body = m_world->CreateBody(&body_def);
-
-    // new soldier instance
-    Soldier *unit;
-    switch (unit_def.side) {
-    case e_RED:
-        unit = new RedSoldier(unit_def.life, unit_def.size, body);
-        m_R_units.insert((RedSoldier*)unit);
-        break;
-    case e_BLACK:
-        unit = new BlackSoldier(unit_def.life, unit_def.size, body);
-        m_B_units.insert((BlackSoldier*)unit);
-        break;
-    default:
-        qFatal("invalid side value!");
-    }
-    connect(unit, SIGNAL(hurt(int)), this, SLOT(onSoldierHurt(int)));
-    connect(unit, SIGNAL(died()), this, SLOT(onSoldierDied()));
-    connect(unit, SIGNAL(triggered()), this, SLOT(destroySoldier()));
-    m_scene->addItem(unit);
-}
-
-void GameSystem::addBrick(Brick *brick)
-{
-    connect(brick, SIGNAL(died()), this, SLOT(onBrickDied()));
-    m_bricks << brick;
-    m_scene->addItem(brick);
-}
+//void GameSystem::createLand()
 
 void GameSystem::setoffSoldier(Soldier *unit)
 {
@@ -219,6 +162,13 @@ void GameSystem::advanceScene()
 {
     //    Q_ASSERT(m_scene);
     m_scene->advance();
+}
+
+void GameSystem::onInitialized()
+{
+    connect(m_proxy_engine, SIGNAL(requiresUpdate()), this, SLOT(advanceScene()));
+    advanceScene();
+    waitForOperation();
 }
 
 void GameSystem::waitForOperation()

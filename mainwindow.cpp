@@ -14,9 +14,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     m_gamesystem(new GameSystem),
     m_fs(nullptr), m_cfs(nullptr),
-    m_bt_group(this), m_max_weapon_id(2)
+    m_bt_group(this), m_max_weapon_id(2),
+    m_game_name("Warzone")
 {
     ui->setupUi(this);
+    setWindowTitle(m_game_name);
     // button logic
     m_bt_group.addButton(ui->rbt_bazooka);
     m_bt_group.addButton(ui->rbt_grenade);
@@ -40,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
     view.scale(0.6, -0.6);
 
     // game system logic
+    connect(m_gamesystem, SIGNAL(initializing(bool)), this, SLOT(onInitializing(bool)));
     connect(m_gamesystem, SIGNAL(requireOperation(Side)), this, SLOT(onWaitingOperation(Side)));
     connect(m_gamesystem, SIGNAL(playerChanged(Side)), this, SLOT(onPlayerChanged(Side)));
     connect(m_gamesystem, SIGNAL(beginSimulating()), this, SLOT(onSimulating()));
@@ -101,6 +104,14 @@ void MainWindow::onPlayerChanged(Side)
     ui->rbt_bazooka->click();
 }
 
+void MainWindow::onInitializing(bool flag)
+{
+    if (flag)
+        setWindowTitle(m_game_name + " (initializing...)");
+    else
+        setWindowTitle(m_game_name);
+}
+
 void MainWindow::setEnableBtGroup(bool flag)
 {
     foreach (auto bt, m_bt_group.buttons()) {
@@ -148,7 +159,7 @@ void MainWindow::turnRight()
 
 void MainWindow::charge()
 {
-    m_charge = qMin(m_charge + 0.005, 1.0);
+    m_charge = qMin(m_charge + 0.01, 1.0); // 1s full
 }
 
 void MainWindow::keepDoing(MainWindow::FunPtr what)
@@ -156,7 +167,7 @@ void MainWindow::keepDoing(MainWindow::FunPtr what)
     Q_ASSERT(!m_timer.isActive());
     disconnect(&m_timer, &QTimer::timeout, 0, 0);
     connect(&m_timer, &QTimer::timeout, this, what);
-    m_timer.start(10);
+    m_timer.start(10);  // 100 shots per sec
 }
 
 void MainWindow::destroyFS()

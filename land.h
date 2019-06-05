@@ -17,8 +17,6 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     void advance(int) override {} // land is static
-
-    static Land *create(b2Body *body, qreal w, qreal h);    // helper function, half width and half height
 };
 
 #endif // LAND_H

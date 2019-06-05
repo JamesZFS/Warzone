@@ -37,6 +37,8 @@ extern const int brick_life1;
 extern const int brick_life2;
 
 extern const float brick_friction;
+extern const float bazooka_velocity;
+extern const float grenade_velocity;
 
 }
 

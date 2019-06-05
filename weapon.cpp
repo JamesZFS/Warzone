@@ -59,10 +59,10 @@ Bazooka::Bazooka(b2Body *body, float32 power_ratio) :
     ContactWeapon(body, power_ratio)
 {
     Q_ASSERT(!body->GetFixtureList());
-    body->SetGravityScale(2.0);
+    body->SetGravityScale(1.5);
     // a triangle shape
     b2PolygonShape shape;
-    static b2Vec2 tri[3] = {b2Vec2(-0.3, -0.5), b2Vec2(0.3, -0.5), b2Vec2(0, 0.8)};
+    static b2Vec2 tri[3] = {b2Vec2(-0.5, -0.7), b2Vec2(0.5, -0.7), b2Vec2(0, 1.0)};
     shape.Set(tri, 3);
     body->CreateFixture(&shape, GameConsts::bazooka_density);
 
@@ -106,7 +106,7 @@ void Bazooka::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 void Bazooka::_launch()  // fire cannon
 {
     // give it an initial linear velocity
-    m_body->SetLinearVelocity(100 * m_dir);
+    m_body->SetLinearVelocity(GameConsts::grenade_velocity * m_dir);
 }
 
 void Bazooka::_trigger() // called when cannon hits something
@@ -150,7 +150,7 @@ Grenade::Grenade(b2Body *body, float32 power_ratio, qreal duration, Engine *prox
     b2FixtureDef def;
     def.restitution = 0.2;
     def.density = GameConsts::grenade_density;
-    def.friction = 0.2;
+    def.friction = 0.05;
     def.shape = &shape;
     body->CreateFixture(&def);
 //    def.shape = &head;
@@ -170,7 +170,7 @@ void Grenade::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
 void Grenade::_launch()
 {
-    m_body->SetLinearVelocity(100 * m_dir);
+    m_body->SetLinearVelocity(GameConsts::grenade_velocity * m_dir);
     m_body->SetAngularVelocity(-50 * m_dir.x);
     startTiming();
 }

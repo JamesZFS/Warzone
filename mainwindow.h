@@ -34,6 +34,7 @@ private slots:
     void onUnitHurt(int damage);
     void onGameOver(Side winner);
     void onPlayerChanged(Side cur_side);
+    void onInitializing(bool flag);
 
     void aimUp();
     void aimDown();
@@ -59,6 +60,7 @@ private:
     QTimer m_timer;
     QButtonGroup m_bt_group;
     const int m_max_weapon_id;
+    const QString m_game_name;
 
 protected:
     void keepDoing(FunPtr what);
