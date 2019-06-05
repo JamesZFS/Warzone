@@ -6,10 +6,8 @@ void ContactListener::BeginContact(b2Contact *contact)
 
     auto body_A = contact->GetFixtureA()->GetBody();
     auto body_B = contact->GetFixtureB()->GetBody();
-//    auto actor_A = (Actor*)body_A->GetUserData();
-//    auto actor_B = (Actor*)body_B->GetUserData();
-    auto actor_A = static_cast<Actor*>(body_A->GetUserData());
-    auto actor_B = static_cast<Actor*>(body_B->GetUserData());
+    auto actor_A = (Actor*)(body_A->GetUserData());
+    auto actor_B = (Actor*)(body_B->GetUserData());
 //    Q_ASSERT(actor_A && actor_B);
 
     // contact weapon detection

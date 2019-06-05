@@ -7,26 +7,44 @@ Land::Land(b2Body *land_body) : Actor(land_body)
 {
     Q_ASSERT(m_body->GetFixtureList());
     m_body->SetType(b2_staticBody); // land cannot move
-    for (auto *fixture = m_body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
-        fixture->SetFriction(0.8);
-        auto b_polygon = dynamic_cast<b2PolygonShape*>(fixture->GetShape());
-        Q_ASSERT(b_polygon);
-        auto polygon = fromB2Polygon(*b_polygon);
-        m_bbox = m_bbox.united(polygon.boundingRect());
-    }
+    m_bbox = findBodyBound();
+    qDebug() << "LAND BOX:" << m_bbox;
     m_bbox += QMarginsF(1, 1, 1, 1);    // adjust
 }
 
 void Land::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
-    int i = 0;
-    for (auto *fixture = m_body->GetFixtureList(); fixture; fixture = fixture->GetNext(), ++i) {
-        auto b_polygon = dynamic_cast<b2PolygonShape*>(fixture->GetShape());
-        Q_ASSERT(b_polygon);
+    static QPixmap texture(":/img/grasstexture.jpg");
+    static QBrush brush;
+    brush.setTexture(texture);
+    painter->setBrush(brush);
+    drawFixtures(painter, m_body->GetFixtureList());
+}
 
-        auto polygon = fromB2Polygon(*b_polygon);
-        QColor color(10, 180 + 20 * i, 20);
-        painter->setBrush(color);
-        painter->drawPolygon(polygon);
-    }
+Land *Land::create(b2Body *body, qreal w, qreal h)
+{
+    b2PolygonShape shape;
+    // four edges:
+    shape.SetAsBox(w, 1, b2Vec2(0, +h - 1), 0);
+    body->CreateFixture(&shape, 0);
+    shape.SetAsBox(w, 1, b2Vec2(0, -h + 1), 0);
+    body->CreateFixture(&shape, 0);
+    shape.SetAsBox(1, h, b2Vec2(-w + 1, 0), 0);
+    body->CreateFixture(&shape, 0);
+    shape.SetAsBox(1, h, b2Vec2(+w - 1, 0), 0);
+    body->CreateFixture(&shape, 0);
+
+    // land: (shape like "M")
+    b2Vec2 pl[4] = { b2Vec2(-w, -h/2), b2Vec2(-4*w/5, 0), b2Vec2(-2*w/5, 0), b2Vec2(-w/5, -h/2) };
+    b2Vec2 pr[4] = { b2Vec2(+w, -h/2), b2Vec2(+4*w/5, 0), b2Vec2(+2*w/5, 0), b2Vec2(+w/5, -h/2) };
+    shape.Set(pl, 4);
+    body->CreateFixture(&shape, 0);
+    shape.Set(pr, 4);
+    body->CreateFixture(&shape, 0);
+
+    // bottom
+    shape.SetAsBox(w, h/4, b2Vec2(0, -3*h/4), 0);
+    body->CreateFixture(&shape, 0);
+
+    return new Land(body);
 }

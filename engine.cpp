@@ -37,11 +37,19 @@ void Engine::disableAlways()
     m_always_flag = false;
 }
 
+void Engine::setSleep()
+{
+    for (b2Body *body = m_world->GetBodyList(); body; body = body->GetNext()) {
+        body->SetAwake(false);
+    }
+}
+
 void Engine::stepWorld()
 {
     dumpTrash();
     if (!worldIsChanging() && m_n_iter) {   // everything is static, stop simulation
         m_timer->stop();
+        setSleep();
         emit finished(m_n_iter);
         return;
     }

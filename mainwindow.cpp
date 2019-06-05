@@ -36,11 +36,12 @@ MainWindow::MainWindow(QWidget *parent) :
     view.setCacheMode(QGraphicsView::CacheBackground);
     view.setTransformationAnchor(QGraphicsView::NoAnchor);
     view.setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
-//    view.setDragMode(QGraphicsView::ScrollHandDrag);
-    view.scale(0.8, -0.8);
+    view.setDragMode(QGraphicsView::ScrollHandDrag);
+    view.scale(0.6, -0.6);
 
     // game system logic
     connect(m_gamesystem, SIGNAL(requireOperation(Side)), this, SLOT(onWaitingOperation(Side)));
+    connect(m_gamesystem, SIGNAL(playerChanged(Side)), this, SLOT(onPlayerChanged(Side)));
     connect(m_gamesystem, SIGNAL(beginSimulating()), this, SLOT(onSimulating()));
     connect(m_gamesystem, SIGNAL(unitHurt(int)), this, SLOT(onUnitHurt(int)));
     connect(m_gamesystem, SIGNAL(gameOver(Side)), this, SLOT(onGameOver(Side)));
@@ -59,7 +60,7 @@ void MainWindow::onActionstartTriggered()
     destroyFS();
     m_pressed_key = 0;
     m_aim_angle = 0;
-    m_weapon_type = Weapon::e_NONE;
+    ui->rbt_bazooka->click();
     m_gamesystem->start();
 }
 
@@ -78,7 +79,7 @@ void MainWindow::onWaitingOperation(Side side)
 
 void MainWindow::onSimulating()
 {
-    setEnableBtGroup(false);
+    setEnableBtGroup(false);    // lock
 }
 
 void MainWindow::onUnitHurt(int damage)
@@ -95,12 +96,16 @@ void MainWindow::onGameOver(Side winner)
     QMessageBox::information(this, "Game Over", msg, QMessageBox::Ok);
 }
 
+void MainWindow::onPlayerChanged(Side)
+{
+    ui->rbt_bazooka->click();
+}
+
 void MainWindow::setEnableBtGroup(bool flag)
 {
     foreach (auto bt, m_bt_group.buttons()) {
         bt->setEnabled(flag);
     }
-    if (flag) ui->rbt_bazooka->click();   // default selection
 }
 
 void MainWindow::switchWeapon()

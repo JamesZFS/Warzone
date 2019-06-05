@@ -33,6 +33,7 @@ private slots:
     void onSimulating();
     void onUnitHurt(int damage);
     void onGameOver(Side winner);
+    void onPlayerChanged(Side cur_side);
 
     void aimUp();
     void aimDown();

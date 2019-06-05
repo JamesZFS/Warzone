@@ -36,7 +36,8 @@ SOURCES += \
     contactlistener.cpp \
     frontsight.cpp \
     explosioncallback.cpp \
-    explosioneffect.cpp
+    explosioneffect.cpp \
+    brick.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -51,7 +52,8 @@ HEADERS += \
     contactlistener.h \
     frontsight.h \
     explosioneffect.h \
-    explosioncallback.h
+    explosioncallback.h \
+    brick.h
 
 FORMS += \
         mainwindow.ui

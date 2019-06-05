@@ -26,6 +26,7 @@ public slots:
     void doSimulation();    // entrance
     void enableAlways();     // keep simulation even if world is not changing
     void disableAlways();     // return to normal
+    void setSleep();    // set all bodies to sleeping state
 
 private slots:
     void stepWorld();

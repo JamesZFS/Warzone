@@ -5,6 +5,7 @@
 #include "soldier.h"
 #include "land.h"
 #include "weapon.h"
+#include "brick.h"
 
 #include <QObject>
 #include <QSet>
@@ -65,6 +66,7 @@ protected:
     void resetWorld();
     void initWorld();    // called right after start()
     void createLand();
+    void createBrick(const BrickDef &brick_def);
     void createSoldier(const SoldierDef &unit_def);
     void setoffSoldier(Soldier *unit);
     void setCurUnit(Soldier *unit);
@@ -80,6 +82,7 @@ protected slots:
     void onSimulationFinished(quint32 n_iter);  // called right after simulation
     void onSoldierHurt(int damage);
     void onSoldierDied();
+    void onBrickDied();
 
 private:
     // world members:
@@ -88,6 +91,7 @@ private:
     // red side v.s. black side
     QSet<RedSoldier *> m_R_units;
     QSet<BlackSoldier *> m_B_units;
+    QSet<Brick *> m_bricks;
     b2ParticleSystem *m_water_system;
     Soldier *m_cur_unit;  // current moving unit
     Weapon *m_cur_weapon;   // current selected weapon
@@ -96,7 +100,6 @@ private:
     Side m_cur_player;
     QSet<RedSoldier*>::const_iterator m_R_iter;
     QSet<BlackSoldier*>::const_iterator m_B_iter;
-    qreal m_world_size;  // half physical world size, the world is ranged (-size, size)^2
     GameState m_game_state;
     Engine *m_proxy_engine;  // proxy simulator
     ContactListener *m_contact_listener;

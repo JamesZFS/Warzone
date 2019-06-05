@@ -5,6 +5,7 @@
 #include "engine.h"
 
 #include <QPainter>
+#include <QtMath>
 
 
 Weapon::Weapon(b2Body *body, float32 power_ratio) :
@@ -77,9 +78,14 @@ void Bazooka::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
         break;
     }
     case e_LAUNCHED: {
+        auto v = m_body->GetLinearVelocity();
+        auto angle = b2Atan2(v.y, v.x) - b2_pi/2;
+        qDebug() << qRadiansToDegrees(angle);
+        m_body->SetTransform(m_body->GetPosition(), angle);
         painter->setBrush(QColor(220, 190, 50));
         painter->drawPolygon(m_shape);
-        QLinearGradient g(QPointF(0, 0), QPointF(0, -10));
+        // draw tail
+        static QLinearGradient g(QPointF(0, 0), QPointF(0, -10));
         g.setColorAt(0, QColor(220, 0, 0));
         g.setColorAt(1, QColor(240, 200, 180));
         painter->setBrush(g);
@@ -141,7 +147,7 @@ Grenade::Grenade(b2Body *body, float32 power_ratio, qreal duration, Engine *prox
 //    head.m_p.Set(0, 0.4);
 //    head.m_radius = 0.3;
     b2FixtureDef def;
-    def.restitution = 0.4;
+    def.restitution = 0.2;
     def.density = GameConsts::grenade_density;
     def.friction = 0.2;
     def.shape = &shape;

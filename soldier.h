@@ -40,7 +40,7 @@ struct SoldierDef
 /** the soldier is simplified into a circle body,
  * with its origin the center of mass
  */
-class Soldier : public Actor
+class Soldier : public AnimateActor
 {
     Q_OBJECT
 public:
@@ -53,10 +53,7 @@ public:
 
     Soldier(Side side, int life, qreal size, b2Body *body);
 
-    int getLife() const;
-    qreal getPower() const;
-    void setLife(int value);
-    void takeDamage(int damage);
+    qreal getPower() const;    
     void setPower(qreal value);
     b2Body *getBody() const;
     qreal getRadius() const;
@@ -83,17 +80,9 @@ public:
     const Side m_side;
 
 signals:
-    void died();    // emit when life == 0
-    void hurt(int damage);
     void triggered();   // emit when setoff is called
 
 private:
-    /**
-     * HP, > 0
-     * when HP == 0, the soldier BOOMS to die
-     */
-    int m_life;
-
     /** attack ability
      * the greater power, the more clumsy a soldier is (larger mass)
      */
