@@ -197,7 +197,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Enter:
     {
         destroyFS();
-        m_charge = 0.2;
+        m_charge = 0.05;
         keepDoing(&MainWindow::charge);
         break;
     }

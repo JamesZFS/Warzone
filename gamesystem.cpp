@@ -88,15 +88,23 @@ void GameSystem::initWorld()
     // create land
     createLand();
 
-    auto w = GameConsts::world_width;
+    auto w = GameConsts::world_width, h = GameConsts::world_height;
     // create bricks
     for (int i = 0; i < GameConsts::max_n_brick; ++i) {
-        BrickDef def;
-        def.rand();
-        b2PolygonShape shape;
-        shape.SetAsBox(1, 0.5);
-        def.shape = &shape;
-        createBrick(def);
+//        BrickDef def;
+//        def.rand();
+//        def.position.y = 0;
+//        b2PolygonShape shape;
+//        shape.SetAsBox(1, 0.5);
+//        def.shape = &shape;
+//        createBrick(def);
+        b2BodyDef def;
+        def.type = b2_dynamicBody;
+        def.angle = randf(0, b2_pi);
+        def.position.Set(randf(-0.8*w, 0.8*w), 0);
+        auto body = m_world->CreateBody(&def);
+        auto brick = Brick::createU(body, 20, 10);
+        addBrick(brick);
     }
 
     // todo generate particles
@@ -141,9 +149,7 @@ void GameSystem::createBrick(const BrickDef &brick_def)
     b2Body *body = m_world->CreateBody(&body_def);
     body->CreateFixture(brick_def.shape, brick_def.density)->SetFriction(0.2);
     auto brick = new Brick(body, brick_def.life, brick_def.color);
-    connect(brick, SIGNAL(died()), this, SLOT(onBrickDied()));
-    m_bricks << brick;
-    m_scene->addItem(brick);
+    addBrick(brick);
 }
 
 void GameSystem::createSoldier(const SoldierDef &unit_def)
@@ -171,6 +177,13 @@ void GameSystem::createSoldier(const SoldierDef &unit_def)
     connect(unit, SIGNAL(died()), this, SLOT(onSoldierDied()));
     connect(unit, SIGNAL(triggered()), this, SLOT(destroySoldier()));
     m_scene->addItem(unit);
+}
+
+void GameSystem::addBrick(Brick *brick)
+{
+    connect(brick, SIGNAL(died()), this, SLOT(onBrickDied()));
+    m_bricks << brick;
+    m_scene->addItem(brick);
 }
 
 void GameSystem::setoffSoldier(Soldier *unit)
@@ -366,8 +379,8 @@ void GameSystem::onBrickDied()
     auto brick = qobject_cast<Brick*>(sender());
     Q_ASSERT(brick);
     qDebug("  a brick died");
+    if (!m_bricks.remove(brick)) return;    // avoid dumplicative deletion
     m_scene->removeItem(brick);
-    m_bricks.remove(brick);
     m_proxy_engine->discard(brick);
 }
 

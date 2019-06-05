@@ -38,7 +38,7 @@ public:
     static Brick *createBlock(b2Body *body, qreal size, const QColor &color = Qt::gray);
     static Brick *createCircle(b2Body *body, qreal rad, const QColor &color = Qt::gray);
     static Brick *createTriangle(b2Body *body, qreal size, const QColor &color = Qt::gray);
-    static Brick *createU(b2Body *body, qreal width, qreal height, const QColor &color = Qt::gray);
+    static Brick *createU(b2Body *body, qreal width, qreal height, qreal thickness = 2, const QColor &color = Qt::gray);
 
 protected:
     QColor m_color;

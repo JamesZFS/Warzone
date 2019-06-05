@@ -7,6 +7,8 @@
 #include <QPainter>
 #include <QtMath>
 
+static const auto pi_2 = b2_pi / 2;
+
 
 Weapon::Weapon(b2Body *body, float32 power_ratio) :
     Actor(body), m_state(e_COMMON), m_power_ratio(power_ratio)
@@ -79,9 +81,8 @@ void Bazooka::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     }
     case e_LAUNCHED: {
         auto v = m_body->GetLinearVelocity();
-        auto angle = b2Atan2(v.y, v.x) - b2_pi/2;
-        qDebug() << qRadiansToDegrees(angle);
-        m_body->SetTransform(m_body->GetPosition(), angle);
+        auto angle = b2Atan2(v.y, v.x) - pi_2;
+        m_body->SetTransform(m_body->GetPosition(), angle); // adjust bazooka angle
         painter->setBrush(QColor(220, 190, 50));
         painter->drawPolygon(m_shape);
         // draw tail

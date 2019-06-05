@@ -68,6 +68,7 @@ protected:
     void createLand();
     void createBrick(const BrickDef &brick_def);
     void createSoldier(const SoldierDef &unit_def);
+    void addBrick(Brick *brick);
     void setoffSoldier(Soldier *unit);
     void setCurUnit(Soldier *unit);
     Side checkWhoWins();  // if either side runs out of soldiers, then the other side wins
