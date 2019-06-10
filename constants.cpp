@@ -30,11 +30,14 @@ const quint32 max_n_static_iter = 2;
 const int brick_life1 = 30;
 const int brick_life2 = 100;
 
-const float brick_friction = 0.7;
+const float brick_friction = 0.8;
 
 const float bazooka_velocity = 90;
 const float grenade_velocity = 60;
 const float bullet_velocity = 5000;
 const int max_weapon_id = 3;
+
+const uint16 red_category = 1 << 1;
+const uint16 black_category = 1 << 2;
 
 }

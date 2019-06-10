@@ -188,10 +188,10 @@ ExplosionEffect *Grenade::_createExplosionEffect() const
 Shotgun::Shotgun(b2Body *body, float32 power_ratio) : ContactWeapon(body, power_ratio)
 {
     Q_ASSERT(!body->GetFixtureList());
-    body->SetGravityScale(1.5);
+    body->SetGravityScale(0.5);
     // a triangle shape
     b2PolygonShape shape;
-    static b2Vec2 tri[3] = {b2Vec2(-0.2, -0.5), b2Vec2(0.2, -0.5), b2Vec2(0, 0.8)};
+    static b2Vec2 tri[3] = {b2Vec2(-0.1, -0.25), b2Vec2(0.1, -0.25), b2Vec2(0, 0.4)};
     shape.Set(tri, 3);
     body->CreateFixture(&shape, GameConsts::bullet_density);
 
@@ -214,10 +214,10 @@ void Shotgun::_launch()
 
 void Shotgun::_trigger()
 {
-    ExplosionCallback::create(m_body, 3 * m_power_ratio, 40 * m_power_ratio);
+    ExplosionCallback::create(m_body, 3 * m_power_ratio, 25 * m_power_ratio);
 }
 
 ExplosionEffect *Shotgun::_createExplosionEffect() const
 {
-    return new SoldierExplosionEffect(20 * m_power_ratio);
+    return new SoldierExplosionEffect(15 * m_power_ratio);
 }

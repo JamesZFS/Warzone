@@ -16,8 +16,8 @@ Brick::Brick(b2Body *body, int life, const QBrush *brush) :
     AnimateActor(body, life), m_brush(brush)
 {
     if (brush == nullptr) m_brush = &default_brush;
-    m_body->SetLinearDamping(0.2);
-    m_body->SetAngularDamping(0.2);
+    m_body->SetLinearDamping(0.3);
+    m_body->SetAngularDamping(0.6);
     m_bbox = findBodyBound();
 }
 

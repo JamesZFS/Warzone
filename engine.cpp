@@ -11,6 +11,7 @@ Engine::Engine(QObject *parent, b2World *world) :
     m_busy(false), m_skip(false)
 {
     Q_ASSERT(world);
+
     connect(this, &QThread::finished, this, [this](){
         qDebug() << "catch finished() signal!";
         emit simulationFinished();

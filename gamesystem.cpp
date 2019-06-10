@@ -244,7 +244,6 @@ void GameSystem::moveCurUnit(const b2Vec2 &strength)
 {
     Q_ASSERT(m_game_state == e_OPERATIONAL);
     m_cur_unit->jump(strength);
-
     syncSimulateThen(&GameSystem::waitForOperation);
 }
 
@@ -361,6 +360,12 @@ void GameSystem::skipCurUnit()
     switchPlayer();
 }
 
+static b2Vec2 rotate(const b2Vec2 &v, qreal deg)
+{
+    deg = qDegreesToRadians(deg);
+    return b2Vec2(v.x * cos(deg) - v.y * sin(deg), v.x * sin(deg) + v.y * cos(deg));
+}
+
 void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
 {
     Q_ASSERT(m_game_state == e_OPERATIONAL);
@@ -381,20 +386,30 @@ void GameSystem::fireCurUnit(Weapon::Type weapon, const b2Vec2 &strength)
     case Weapon::e_GRENADE:
         m_cur_weapon = new Grenade(weapon_body, m_cur_unit->getPower(), 3, s_proxy_engine);
         break;
-    case Weapon::e_SHOTGUN:
-        m_cur_weapon = new Shotgun(weapon_body, m_cur_unit->getPower());
+    case Weapon::e_SHOTGUN: {   // three pieces
+        static qreal angles[3] = {0, 6, -6};
+        for (int i = 0; i < 3; ++i) {
+            def.position = m_cur_unit->getBody()->GetPosition() + rotate(dir, angles[i]) * m_cur_unit->getSize() * 5;
+            m_cur_weapon = new Shotgun(m_world->CreateBody(&def), m_cur_unit->getPower());
+            m_cur_weapon->setCollisionFilter(m_cur_player);
+            m_scene->addItem(m_cur_weapon);
+            connect(m_cur_weapon, SIGNAL(triggered()), this, SLOT(destroyWeapon()));
+            m_cur_weapon->aim(rotate(strength, angles[i]));
+            m_cur_weapon->launch();
+        }
         break;
+    }
     default:
         qFatal("Weapon not implemented!");
         break;
     }
-    m_scene->addItem(m_cur_weapon);
-
-    connect(m_cur_weapon, SIGNAL(triggered()), this, SLOT(destroyWeapon()));
-
-    m_cur_weapon->aim(strength);
-    m_cur_weapon->launch();
-
+    if (weapon != Weapon::e_SHOTGUN) {
+        m_cur_weapon->setCollisionFilter(m_cur_player); // shouldn't collide with cur_side's fortress
+        m_scene->addItem(m_cur_weapon);
+        connect(m_cur_weapon, SIGNAL(triggered()), this, SLOT(destroyWeapon()));
+        m_cur_weapon->aim(strength);
+        m_cur_weapon->launch();
+    }
     syncSimulateThen(&GameSystem::switchPlayer);
 }
 

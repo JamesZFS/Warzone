@@ -2,6 +2,7 @@
 #define CONSTANTS_H
 
 #include <QtGlobal>
+#include <Box2D/Common/b2Math.h>
 
 struct b2BodyDef;
 struct b2FixtureDef;
@@ -42,6 +43,9 @@ extern const float bazooka_velocity;
 extern const float grenade_velocity;
 extern const float bullet_velocity;
 extern const int max_weapon_id;
+
+extern const uint16 red_category;
+extern const uint16 black_category;     // for collision filter
 
 }
 

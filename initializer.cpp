@@ -55,26 +55,35 @@ void FortressInitializer::initBricks(QSet<Brick *> &bricks)
     // create bricks
     b2BodyDef def;
     b2Body *body;
+    Brick *brick;
     def.type = b2_dynamicBody;
     def.angle = b2_pi;
 
-    // left
+    // left fortress
     def.position.Set(-0.6*w, 0.3*h);
     body = m_world->CreateBody(&def);
-    bricks << Brick::createU(body, 0.2*w, 0.3*h, 2, &brush_iron);   // "N" shape
+    brick = Brick::createU(body, 0.2*w, 0.3*h, 2, &brush_iron);   // "N" shape
+    brick->setCollisionCategory(e_RED);
+    bricks << brick;
 
     def.position.Set(-0.6*w, 0.5*h);
     body = m_world->CreateBody(&def);
-    bricks << Brick::createU(body, 0.1*w, 0.2*h, 1.5, &brush_iron);
+    brick = Brick::createU(body, 0.1*w, 0.2*h, 1.5, &brush_iron);
+    brick->setCollisionCategory(e_RED);
+    bricks << brick;
 
-    // right
+    // right fortress
     def.position.Set(+0.6*w, 0.3*h);
     body = m_world->CreateBody(&def);
-    bricks << Brick::createU(body, 0.2*w, 0.3*h, 2, &brush_wood);
+    brick = Brick::createU(body, 0.2*w, 0.3*h, 2, &brush_wood);
+    brick->setCollisionCategory(e_BLACK);
+    bricks << brick;
 
     def.position.Set(+0.6*w, 0.5*h);
     body = m_world->CreateBody(&def);
-    bricks << Brick::createU(body, 0.1*w, 0.2*h, 1.5, &brush_wood);
+    brick = Brick::createU(body, 0.1*w, 0.2*h, 1.5, &brush_wood);
+    brick->setCollisionCategory(e_BLACK);
+    bricks << brick;
 
     for (int i = 0; i < GameConsts::max_n_brick; ++i) {
         def.position.Set(randf(-0.3*w, 0.3*w), randf(0*h, 0.3*h));

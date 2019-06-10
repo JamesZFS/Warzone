@@ -67,6 +67,24 @@ QRectF Actor::findBodyBound() const
     return bound + QMargins(1, 1, 1, 1);
 }
 
+void Actor::setCollisionCategory(Side side)
+{
+    b2Filter ft;
+    ft.categoryBits = side == e_RED ? GameConsts::red_category : GameConsts::black_category;
+    for (auto fixture = m_body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
+        fixture->SetFilterData(ft);
+    }
+}
+
+void Actor::setCollisionFilter(Side side)
+{
+    b2Filter ft;
+    ft.maskBits &= side == e_RED ? ~GameConsts::red_category : ~GameConsts::black_category;
+    for (auto fixture = m_body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
+        fixture->SetFilterData(ft);
+    }
+}
+
 void Actor::drawFixtures(QPainter *painter, const b2Fixture *fixture) const
 {
     while (fixture) {

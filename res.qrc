@@ -12,5 +12,6 @@
         <file>res/woodfencetexture.jpeg</file>
         <file>res/W4_Shotgun.png</file>
         <file>res/skip.png</file>
+        <file>res/Icon.png</file>
     </qresource>
 </RCC>

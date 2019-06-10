@@ -112,3 +112,4 @@ BlackSoldier::BlackSoldier(int life_, qreal size_, b2Body *body_) :
     Soldier(e_BLACK, life_, size_, body_)
 {
 }
+

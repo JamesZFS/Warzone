@@ -4,7 +4,7 @@
 
 
 FrontSight::FrontSight() :
-    m_bbox(40, -20, 20, 40)
+    m_bbox(70, -20, 20, 40)
 {
 
 }
@@ -19,7 +19,7 @@ void FrontSight::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWid
     QPolygonF tri;
     tri << QPointF(0, 3) << QPointF(-3, 15) << QPointF(3, 15);
     painter->save();
-    painter->translate(50, 0);
+    painter->translate(80, 0);
     painter->setBrush(QColor(180, 190, 250));
     painter->rotate(45);
     painter->drawPolygon(tri);

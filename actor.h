@@ -15,6 +15,11 @@ class b2Fixture;
 struct b2AABB;
 typedef float float32;
 
+enum Side
+{
+    e_RED, e_BLACK, e_NONE, e_TIE
+};
+
 class Actor : public QGraphicsObject
 {
 public:
@@ -29,6 +34,8 @@ public:
     QPolygonF fromB2Polygon(const b2PolygonShape &b2_poly) const;
     QRectF fromB2AABB(const b2AABB &aabb) const;    // be careful to use this
     QRectF findBodyBound() const;
+    void setCollisionCategory(Side side);
+    void setCollisionFilter(Side side);
 
 protected:
     void drawFixtures(QPainter *painter, const b2Fixture *fixture) const;
