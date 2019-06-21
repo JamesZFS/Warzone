@@ -40,5 +40,29 @@ public:
     void initUnits(QSet<RedSoldier *> &R_units, QSet<BlackSoldier *> &B_units) override;
 };
 
+class ClassicInitializer : public Initializer
+{
+public:
+    ClassicInitializer(b2World *world) : Initializer(world) {}
+
+    // Initializer interface
+public:
+    void initLand(Land *&land) override;
+    void initBricks(QSet<Brick *> &bricks) override;
+    void initUnits(QSet<RedSoldier *> &R_units, QSet<BlackSoldier *> &B_units) override;
+};
+
+class DoubleDeckInitializer : public Initializer
+{
+public:
+    DoubleDeckInitializer(b2World *world) : Initializer(world) {}
+
+    // Initializer interface
+public:
+    void initLand(Land *&land) override;
+    void initBricks(QSet<Brick *> &bricks) override;
+    void initUnits(QSet<RedSoldier *> &R_units, QSet<BlackSoldier *> &B_units) override;
+};
+
 
 #endif // INITIALIZER_H

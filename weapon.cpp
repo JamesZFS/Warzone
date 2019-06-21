@@ -107,7 +107,7 @@ void Bazooka::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 void Bazooka::_launch()  // fire cannon
 {
     // give it an initial linear velocity
-    m_body->SetLinearVelocity(GameConsts::grenade_velocity * m_dir);
+    m_body->SetLinearVelocity(GameConsts::bazooka_velocity * m_dir);
 }
 
 void Bazooka::_trigger() // called when cannon hits something
@@ -141,7 +141,7 @@ Grenade::Grenade(b2Body *body, float32 power_ratio, qreal duration, Engine *prox
     TimingWeapon(body, power_ratio, proxy_engine), m_duration(duration)
 {
     Q_ASSERT(!body->GetFixtureList());
-    body->SetGravityScale(2.0);
+    body->SetGravityScale(1.5);
     // two circle shapes
     b2CircleShape shape;//, head;
     shape.m_radius = 0.5;   // main part

@@ -24,7 +24,7 @@ GameSystem::~GameSystem()
     delete m_scene;
 }
 
-void GameSystem::start()
+void GameSystem::start(const QString &map_name)
 {
     emit initializing(true);
     if (s_proxy_engine && s_proxy_engine->isRunning()) {
@@ -34,7 +34,7 @@ void GameSystem::start()
     delete s_proxy_engine;
     m_game_state = e_COMMON;
     resetWorld();
-    initWorld();
+    initWorld(map_name);
     // scale to scene x10
     m_scene->setSceneRect(-10 * GameConsts::world_width, -10 * GameConsts::world_height, 20 * GameConsts::world_width, 20 * GameConsts::world_height);
     m_cur_player = e_RED; // let the red operate first
@@ -94,12 +94,22 @@ void GameSystem::resetWorld()
     m_scene->clear();
 }
 
-void GameSystem::initWorld()
+void GameSystem::initWorld(const QString &map_name)
 {
     // create world
     m_world = new b2World(b2Vec2(0, -GameConsts::gravity_constant));
     // link contact listener
-    m_initializer = new FortressInitializer(m_world);
+    if (map_name == "Fortress")
+        m_initializer = new FortressInitializer(m_world);
+    else if (map_name == "Classic" || map_name == "")
+        m_initializer = new ClassicInitializer(m_world);
+    else if (map_name == "Double Deck")
+        m_initializer = new DoubleDeckInitializer(m_world);
+    else {
+        qDebug() << "Got unknown map name: " << map_name;
+        qFatal("wrong map name.");
+    }
+    //else if (map_name == "Double Deck")
     // setup initializer
     m_world->SetContactListener(m_contact_listener);
 
@@ -136,7 +146,7 @@ void GameSystem::initWorld()
     LiquidFun::n_particle_iteration =
             m_world->CalculateReasonableParticleIterations(LiquidFun::time_step);
     Q_ASSERT(m_R_units.size() == m_B_units.size() &&
-             m_R_units.size() == GameConsts::max_n_unit);
+             m_R_units.size() <= GameConsts::max_n_unit);
     qDebug() << "ground and units spwaned! game ready.";
 }
 
@@ -151,7 +161,7 @@ void GameSystem::setCurUnit(Soldier *unit)
 {
     m_cur_unit = unit;
     m_cur_unit->setCurrent(true);
-    m_cur_unit->advance(1);
+    m_cur_unit->update();
     emit setLabelPrompt("Unit Life");
     emit setLCDNumber(unit->life());
 }

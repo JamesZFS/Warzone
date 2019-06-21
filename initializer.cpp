@@ -119,3 +119,126 @@ void FortressInitializer::initUnits(QSet<RedSoldier *> &R_units, QSet<BlackSoldi
         B_units << new BlackSoldier(life, size, body);
     }
 }
+
+void ClassicInitializer::initLand(Land *&land)
+{
+    Q_ASSERT(!land);
+    // new land instance
+    b2BodyDef def;
+    def.position.SetZero();
+    auto body = m_world->CreateBody(&def);
+    b2PolygonShape shape;
+
+    // four edges:
+    shape.SetAsBox(w, 1, b2Vec2(0, +h - 1), 0);
+    body->CreateFixture(&shape, 0);
+    shape.SetAsBox(w, 1, b2Vec2(0, -h + 1), 0);
+    body->CreateFixture(&shape, 0);
+    shape.SetAsBox(1, h, b2Vec2(-w + 1, 0), 0);
+    body->CreateFixture(&shape, 0);
+    shape.SetAsBox(1, h, b2Vec2(+w - 1, 0), 0);
+    body->CreateFixture(&shape, 0);
+
+    // earth
+    shape.SetAsBox(w, h/4, b2Vec2(0, -3*h/4), 0);
+    body->CreateFixture(&shape, 0);
+    land = new Land(body);
+}
+
+void ClassicInitializer::initBricks(QSet<Brick *> &bricks)
+{
+    static const QBrush brush_wood(Qt::white, QPixmap(":/res/woodtexture.jpg"));
+    b2BodyDef def;
+    def.type = b2_dynamicBody;
+    qreal x, y, size;
+    for (int i = 0; i < GameConsts::max_n_brick; ++i) {
+        x = randf(0, 1);
+        x = x * x * (randint(0, 2) == 0 ? 1 : -1);
+        x *= 0.4*w;
+        y = randf(0, 0.2*h);
+        size = randf(0.020*w, 0.050*w);
+        def.position.Set(x, y);
+        def.angle = randf(0, 2*b2_pi);
+        auto brick = Brick::createTriangle(m_world->CreateBody(&def), size, &brush_wood);
+        bricks << brick;
+    }
+}
+
+void ClassicInitializer::initUnits(QSet<RedSoldier *> &R_units, QSet<BlackSoldier *> &B_units)
+{
+    int life = 100;
+    qreal size = 1.0;
+    for (int i = 0; i <= GameConsts::max_n_unit / 2; ++i) {
+        b2BodyDef def;
+        // red
+        def.position.Set(randf(-0.9*w, -0.45*w), randf(0, 0.2*h));
+        auto body = m_world->CreateBody(&def);
+        R_units << new RedSoldier(life, size, body);
+        // black
+        def.position.Set(randf(+0.45*w, +0.9*w), randf(0, 0.2*h));
+        body = m_world->CreateBody(&def);
+        B_units << new BlackSoldier(life, size, body);
+    }
+}
+
+void DoubleDeckInitializer::initLand(Land *&land)
+{
+    Q_ASSERT(!land);
+    // new land instance
+    b2BodyDef def;
+    def.position.SetZero();
+    auto body = m_world->CreateBody(&def);
+    b2PolygonShape shape;
+
+    // four edges:
+    shape.SetAsBox(w, 1, b2Vec2(0, +h - 1), 0);
+    body->CreateFixture(&shape, 0);
+    shape.SetAsBox(w, 1, b2Vec2(0, -h + 1), 0);
+    body->CreateFixture(&shape, 0);
+    shape.SetAsBox(1, h, b2Vec2(-w + 1, 0), 0);
+    body->CreateFixture(&shape, 0);
+    shape.SetAsBox(1, h, b2Vec2(+w - 1, 0), 0);
+    body->CreateFixture(&shape, 0);
+
+    // earth
+    shape.SetAsBox(w, h/4, b2Vec2(0, -3*h/4), 0);
+    body->CreateFixture(&shape, 0);
+    land = new Land(body);
+
+    // floating island
+    shape.SetAsBox(0.4*w, 0.1*h, b2Vec2(-0.5*w, 0.1*h), 0);
+    body->CreateFixture(&shape, 0);
+    shape.SetAsBox(0.4*w, 0.1*h, b2Vec2(+0.5*w, 0.1*h), 0);
+    body->CreateFixture(&shape, 0);
+}
+
+void DoubleDeckInitializer::initBricks(QSet<Brick *> &bricks)
+{
+    const static QBrush brush_brick(Qt::white, QPixmap(":/res/bricktexture.jpeg"));
+    b2BodyDef def;
+    def.type = b2_dynamicBody;
+    for (int i = 0; i < GameConsts::max_n_brick/2; ++i) {
+        auto x = randf(-0.9*w, 0.9*w), y = randf(0, 0.9*h);
+        auto bw = randf(0.015*w, 0.035*w), bh = randf(0.015*w, 0.035*w);
+        def.position.Set(x, y);
+        auto brick = Brick::createRect(m_world->CreateBody(&def), bw, bh, &brush_brick);
+        bricks << brick;
+    }
+}
+
+void DoubleDeckInitializer::initUnits(QSet<RedSoldier *> &R_units, QSet<BlackSoldier *> &B_units)
+{
+    for (int i = 0; i < GameConsts::max_n_unit; ++i) {
+        int life = 100;
+        qreal size = 0.8 + i * 0.1;   // 0.8 - 1.3
+        b2BodyDef def;
+        // red
+        def.position.Set(randf(-0.8*w, +0.8*w), randf(0, 0.7*h));
+        auto body = m_world->CreateBody(&def);
+        R_units << new RedSoldier(life, size, body);
+        // black
+        def.position.Set(randf(-0.8*w, +0.8*w), randf(0, 0.7*h));
+        body = m_world->CreateBody(&def);
+        B_units << new BlackSoldier(life, size, body);
+    }
+}

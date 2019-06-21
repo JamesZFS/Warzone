@@ -85,7 +85,6 @@ private:
     const qreal m_size;  // real size
     const qreal m_radius; // radius on the screen
     State m_state;
-    QRectF m_bbox_org;
 
 protected:
     virtual const QColor getColor() = 0;

@@ -32,7 +32,7 @@ public:
     GameSystem();
     ~GameSystem();
 
-    void start();
+    void start(const QString &map_name);
 
     // step the system (with updation) until next key event (when everything is static)
     void syncSimulateThen(FunPtr next);
@@ -69,7 +69,7 @@ signals:
 
 protected:
     void resetWorld();
-    void initWorld();    // called right after start()
+    void initWorld(const QString &map_name);    // called right after start()
     void setoffSoldier(Soldier *unit);
     void setCurUnit(Soldier *unit);
     Side checkWhoWins();  // if either side runs out of soldiers, then the other side wins

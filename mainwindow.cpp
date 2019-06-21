@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     m_gamesystem(new GameSystem),
     m_fs(nullptr), m_cfs(nullptr),
-    m_bt_group(this), m_game_name("Warzone")
+    m_bt_group(this), m_map_name(""), m_game_name("Warzone")
 {
     ui->setupUi(this);
     setWindowTitle(m_game_name);
@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->bt_start, SIGNAL(clicked()), ui->actionstart, SLOT(trigger()));
     connect(ui->actionstart, SIGNAL(triggered(bool)), this, SLOT(onActionstartTriggered()));
     connect(ui->bt_skip, SIGNAL(clicked()), this, SLOT(onSkip()));
+    connect(ui->comboBox, &QComboBox::currentTextChanged, this, [this](const QString &map_name){ m_map_name = map_name; });
 
     // graphics view
     auto &view = *ui->graphics_view;
@@ -67,7 +68,7 @@ void MainWindow::onActionstartTriggered()
     m_pressed_key = 0;
     m_aim_angle = 0;
     ui->rbt_bazooka->click();
-    m_gamesystem->start();
+    m_gamesystem->start(m_map_name);
 }
 
 void MainWindow::onWaitingOperation(Side side)
@@ -75,7 +76,6 @@ void MainWindow::onWaitingOperation(Side side)
     auto msg = QString("listening for %1 operation...").arg(side == e_RED ? "red" : "black");
     qDebug() << msg;
     ui->bt_start->setEnabled(true);
-    ui->bt_surrender->setEnabled(true);
     ui->bt_skip->setEnabled(true);
     setEnableBtGroup(true);
     m_pressed_key = 0;
@@ -89,7 +89,6 @@ void MainWindow::onWaitingOperation(Side side)
 void MainWindow::onSimulating()
 {
     ui->bt_start->setEnabled(false);
-    ui->bt_surrender->setEnabled(false);
     ui->bt_skip->setEnabled(false);
     setEnableBtGroup(false);    // lock
 }
@@ -106,6 +105,7 @@ void MainWindow::onGameOver(Side winner)
     if (winner == e_TIE) msg += "Tie!";
     else msg += QString("%1 wins!").arg(winner == e_RED ? "Red" : "Black");
     QMessageBox::information(this, "Game Over", msg, QMessageBox::Ok);
+    ui->bt_start->setEnabled(true);
 }
 
 void MainWindow::onPlayerChanged(Side)
@@ -305,4 +305,20 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         break;
     }
     event->accept();
+}
+
+void MainWindow::on_bt_help_clicked()
+{
+    QString help_text =
+            "Welcome to Warzone! A turn-based battle game paying tribute to Worms.\n"
+            "\n"
+            "Aim: WASD\n"
+            "Move: press and hold [enter] or J\n"
+            "Charge: press and hold [space] or K\n"
+            "Fire: release [space] or K\n"
+            "Weapon select: mouse click or Q\n"
+            "Skip turn: mouse click\n"
+            "\n"
+            "Author: James Zheng, Computer Science Department, Tsinghua University.";
+    QMessageBox::information(this, "Help", help_text);
 }

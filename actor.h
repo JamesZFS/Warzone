@@ -56,6 +56,7 @@ public:
     virtual void advance(int phase) override;
 
     b2Body *body() const;
+
 };
 
 class ContactListener;

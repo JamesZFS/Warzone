@@ -43,6 +43,8 @@ private slots:
     void turnRight();
     void charge();
 
+    void on_bt_help_clicked();
+
 private:
     Ui::MainWindow *ui;
     GameSystem *m_gamesystem;   // backend
@@ -60,6 +62,7 @@ private:
     qreal m_charge;
     QTimer m_timer;
     QButtonGroup m_bt_group;
+    QString m_map_name;
     const QString m_game_name;
 
 protected:
